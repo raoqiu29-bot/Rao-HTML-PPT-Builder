@@ -2001,6 +2001,12 @@ N (Next)   - 下一步:<span class="ph">[这一轮完成后下一轮要什么]</
       var stage = document.querySelector('.stage');
       if (!stage) return;
       stage.innerHTML = saved;
+      // v5.2.2 防御:强制清掉 contenteditable,避免旧版 bug 数据导致打开就进编辑状态
+      // 用户必须显式按 E 才能进编辑模式
+      stage.querySelectorAll('[contenteditable]').forEach(function(el) {
+        el.removeAttribute('contenteditable');
+        el.removeAttribute('spellcheck');
+      });
       console.log('[v5.2 inline edit] 已从 localStorage 恢复编辑内容');
     } catch (e) {
       console.warn('[v5.2 inline edit] 恢复失败:', e);
@@ -2166,6 +2172,9 @@ N (Next)   - 下一步:<span class="ph">[这一轮完成后下一轮要什么]</
       if (!e.target || !e.target.isContentEditable) return;
       if ((e.metaKey || e.ctrlKey) && (e.key === 's' || e.key === 'S')) return;
       if (e.key === 'Escape') return;
+      // v5.2.2: PageUp/PageDown/Home/End 即使在 contenteditable 上也允许翻页
+      // 这些键在文字编辑里没有意义,但用户期待翻页,放过去
+      if (e.key === 'PageDown' || e.key === 'PageUp' || e.key === 'Home' || e.key === 'End') return;
       e.stopPropagation();
     }, true);
   }

@@ -8,6 +8,84 @@
 
 ---
 
+## v5.2.2 · 2026-05-12(hotfix)
+
+**主线**:修 v5.2.1 之后用户立刻发现的下一个 bug — **打开 PPT 就翻不了页**。
+
+### 🛠️ 真实踩坑修复
+
+#### 修复 1 · 旧 localStorage 数据导致打开就处于"半编辑"状态
+
+**现象**(用户原话):"我现在打开了之后没办法进行翻页了"。
+
+**根因猜测**(高概率):
+- 用户在 v5.2.0 测试期间,可能进过编辑模式,然后 Ctrl+S 保存(可能在某种 edge case 下,contenteditable 属性混进了 stage.innerHTML)
+- 或者用户在某次编辑模式状态下关闭浏览器,localStorage 里残留了带 contenteditable 的 HTML
+- 打开 PPT → `restoreFromStorage()` 把这段 HTML 塞回 stage → **所有内容元素带 contenteditable**(但 body 没 edit-mode class,用户看不出来)
+- 用户按方向键 → `e.target.isContentEditable === true` → v5.2.1 capture listener stopPropagation → 翻页 JS 收不到
+
+**修正**(防御性 sanitize):
+```javascript
+function restoreFromStorage() {
+  // ... 原本逻辑
+  stage.innerHTML = saved;
+  // v5.2.2:强制清掉 contenteditable,即使 localStorage 里有
+  stage.querySelectorAll('[contenteditable]').forEach(function(el) {
+    el.removeAttribute('contenteditable');
+    el.removeAttribute('spellcheck');
+  });
+}
+```
+
+**逻辑**:**用户必须显式按 E 才能进编辑模式**。任何从 localStorage 加载的数据都不能"自动带编辑状态"。这是防御性编程,确保未来其他 bug 也不会让用户"打开就翻不了页"。
+
+#### 修复 2 · PageUp/PageDown/Home/End 在编辑模式下也允许翻页
+
+**用户场景**:编辑模式下,虽然 contenteditable 拦截了空格 / 方向键(避免输入空格时误翻页),但用户**没有翻页通道**(除非按 Esc 退出编辑 / 点左下角 ← → 按钮)。
+
+**修正**:capture listener 加白名单:
+```javascript
+// PageUp / PageDown / Home / End 即使在 contenteditable 上也允许翻页
+if (e.key === 'PageDown' || e.key === 'PageUp' || e.key === 'Home' || e.key === 'End') return;
+```
+
+**逻辑**:这些键在文字编辑里几乎无意义(短内联文字),但用户期待"翻页"语义,放过去给 Slideshow。
+
+**编辑模式下的完整翻页方式**:
+1. **PageUp / PageDown 键**(v5.2.2 新)— Mac 上是 `Fn + ↑` / `Fn + ↓`
+2. **Home / End 键**(v5.2.2 新)— Mac 上是 `Fn + ←` / `Fn + →`
+3. **左下角 ← → 按钮**(模板自带)— 用鼠标点
+4. **Esc 退出编辑** → 用空格 / 方向键(经典方式)
+
+### Patch 范围
+
+同 v5.2.1,4 个文件全部同步:
+- `assets/template.html`(skill master)
+- `桌面 .../03_培训课件/.../AI应用基础课-双主题切换版.html`
+- `桌面 .../99_工具与模板/.../raoqiu-slide-template-v5.2.html`
+- `桌面 .../99_工具与模板/.../样张-AI应用基础课-双主题切换版.html`
+
+### 用户应对(如果还是翻不了)
+
+**Step 1 · 强制清 localStorage**(最常见解决):
+```javascript
+// 浏览器 Console (F12)
+window.raoqiuEdit.reset()
+// 二次确认 → 清掉所有编辑历史 → 自动刷新 → 翻页恢复
+```
+
+**Step 2 · 如果还不行,debug 命令**:
+```javascript
+console.log({
+  editMode: document.body.classList.contains('edit-mode'),
+  contenteditableCount: document.querySelectorAll('[contenteditable]').length,
+  active: document.activeElement.tagName + (document.activeElement.isContentEditable ? '(可编辑)' : '')
+});
+```
+把输出贴给我看,继续诊断。
+
+---
+
 ## v5.2.1 · 2026-05-12(hotfix)
 
 **主线**:修一个 v5.2.0 发布后用户立刻发现的 bug — 编辑模式下,**按空格键想选中文字时,空格被翻页 JS 拦截,直接跳到下一页**。
