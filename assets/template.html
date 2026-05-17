@@ -2157,6 +2157,17 @@ N (Next)   - 下一步:<span class="ph">[这一轮完成后下一轮要什么]</
       reset: resetToOriginal,
       export: exportEdited
     };
+
+    // v5.2.1 修复:contenteditable 元素上,键盘事件不传给翻页引擎
+    // capture 阶段最早接收,stopPropagation 阻止冒泡到 Slideshow 的翻页/快捷键 listener
+    // 让浏览器原生 contenteditable 处理:空格输空格 / 方向键移光标 / 字母输入 / Enter 换行 / Backspace 删除
+    // 保留 Ctrl+S(给 inline edit 的保存 handler)和 Esc(给退出编辑模式 handler)
+    document.addEventListener('keydown', function(e) {
+      if (!e.target || !e.target.isContentEditable) return;
+      if ((e.metaKey || e.ctrlKey) && (e.key === 's' || e.key === 'S')) return;
+      if (e.key === 'Escape') return;
+      e.stopPropagation();
+    }, true);
   }
 
   if (document.readyState === 'loading') {

@@ -8,6 +8,65 @@
 
 ---
 
+## v5.2.1 · 2026-05-12(hotfix)
+
+**主线**:修一个 v5.2.0 发布后用户立刻发现的 bug — 编辑模式下,**按空格键想选中文字时,空格被翻页 JS 拦截,直接跳到下一页**。
+
+### 🛠️ 真实踩坑修复
+
+#### 修复 1 · contenteditable 元素上,空格 / 方向键被翻页 JS 抢走
+
+**现象**(用户原话):"双击文字了之后可以修改,但是我一旦按空格键去选中这个文字的时候,它就会跳转到下一张。"
+
+**根因**:
+- 模板自带的翻页 JS(`class Slideshow`)在 `document` 上注册了 keydown listener,**空格 / 方向键 / PageDown** 等触发翻页
+- v5.2.0 加的 inline editing JS 内部判断了 `e.target.isContentEditable` 让自己 return,**但没阻止事件继续冒泡传给 Slideshow**
+- 用户在 contenteditable 里按空格 → 浏览器原生处理(输入空格)+ 事件冒泡到 Slideshow → 触发翻页
+
+**修正**(三层保险,4 个文件统一 patch):
+1. **新加 capture 阶段 keydown listener**(注册在 `document` 上,第三参数 `true`)
+2. 检测 `e.target.isContentEditable` → 是 → `e.stopPropagation()` 阻止冒泡
+3. **保留 Ctrl+S / Esc** 让 inline edit 自己的 handler 处理(保存 + 退出编辑模式)
+4. 其他所有键(空格 / 方向键 / 字母 / 数字 / Enter / Backspace 等)→ 浏览器原生 contenteditable 接管输入,**翻页 JS 完全收不到**
+
+**关键代码**(放在 setup() 函数末尾,inline edit JS 块内):
+```javascript
+document.addEventListener('keydown', function(e) {
+  if (!e.target || !e.target.isContentEditable) return;
+  if ((e.metaKey || e.ctrlKey) && (e.key === 's' || e.key === 'S')) return;
+  if (e.key === 'Escape') return;
+  e.stopPropagation();
+}, true);  // capture phase 最早接收
+```
+
+**为什么是 capture 阶段**:
+- 现有 Slideshow keydown listener 是默认的 bubble 阶段
+- capture 阶段比 bubble 早执行
+- 在 capture 阶段 stopPropagation,事件不会冒泡到 Slideshow 的 listener
+- 同时不影响浏览器原生 contenteditable 处理(那是浏览器内核做的事,跟 JS listener 无关)
+
+**为什么不直接改 Slideshow JS**:
+- 那样要动模板自带的翻页引擎代码,影响范围大
+- capture listener 是"打补丁"式修复,对原 JS 0 入侵
+- 升级 Slideshow 时不冲突
+
+**自检**:打开任意 v5.2.1 PPT → 按 E 进编辑 → 点文字 → 按空格 → 应该输入空格,**不翻页**
+
+**Patch 范围**(4 个文件):
+- `assets/template.html`(skill master)
+- `桌面 .../03_培训课件/AI应用基础课-9种风格选择/AI应用基础课-双主题切换版.html`
+- `桌面 .../99_工具与模板/HTML课件设计模板/raoqiu-slide-template-v5.2.html`
+- `桌面 .../99_工具与模板/HTML课件设计模板/样张-AI应用基础课-双主题切换版.html`
+
+### 内部统计
+
+| 文件 | v5.2.0 | v5.2.1 | 变化 |
+|---|---|---|---|
+| assets/template.html | 80 KB | 84 KB | +4 KB(8 行 capture listener + 注释) |
+| 其他文件 | 不变 | 不变 | — |
+
+---
+
 ## v5.2.0 · 2026-05-12
 
 **主线**:解决用户实际痛点 — "做完 HTML PPT 后没办法直接修改内容,要回 VS Code 翻源码改,太麻烦"。沉淀 inline editing 能力到模板,**右上角"编辑 · E"按钮 / E 键快捷键**,点任意文字直接改 + Ctrl+S 保存到 localStorage。
