@@ -143,7 +143,7 @@ async function main() {
       .forEach((sel) => document.querySelectorAll(sel).forEach((e) => e.style.display = 'none'));
   });
 
-  // 逐页截图
+  // 逐页截图(v5.4.1:截 .slide.active 元素 + 等动画 + 强制布局稳定)
   const screenshots = [];
   for (let i = 0; i < slideCount; i++) {
     // 用 slideshow 实例跳到第 i 页
@@ -158,9 +158,25 @@ async function main() {
         });
       }
     }, i);
-    await page.waitForTimeout(400);  // 等动画
-    const png = await page.screenshot({ fullPage: false, type: 'png' });
+    // v5.4.1: 等更长(1000ms)确保:① fadeIn 动画完成 ② 字体加载 ③ FBM 背景渲染 ④ Cormorant 衬线 metric 重排
+    await page.waitForTimeout(1000);
+    // 等字体加载(防止衬线字体没好就截图)
+    await page.evaluate(() => document.fonts.ready);
+    // v5.4.1: 截 .slide.active 元素本身,而不是整个 page · 更精准,不会截到 viewport 之外
+    const activeSlide = await page.$('.slide.active');
+    let png;
+    if (activeSlide) {
+      png = await activeSlide.screenshot({ type: 'png' });
+    } else {
+      png = await page.screenshot({ fullPage: false, type: 'png' });
+    }
     screenshots.push(png);
+    // v5.4.1: 如果开了 debug 模式,把 PNG 单独存到 /tmp/raoqiu-pptx-debug/ 方便排查
+    if (process.env.RAOQIU_PPTX_DEBUG === '1') {
+      const debugDir = '/tmp/raoqiu-pptx-debug';
+      if (!fs.existsSync(debugDir)) fs.mkdirSync(debugDir, { recursive: true });
+      fs.writeFileSync(`${debugDir}/slide-${String(i + 1).padStart(2, '0')}.png`, png);
+    }
     process.stdout.write(`  截图 ${i + 1}/${slideCount}\r`);
   }
   console.log('\n[info] 截图完成,开始打包 PPTX');
@@ -241,4 +257,9 @@ echo "  - 如需真'可编辑 .pptx'(改文字 / 替换图),等 v5.4-beta(用 do
 if [[ "$COMPACT" == "false" ]]; then
   echo "  - 文件太大?加 --compact 参数,大约能压缩到 30-50%"
 fi
+echo ""
+echo "【如果发现某页不对(被裁切 / 元素重叠 / 渲染半截)】"
+echo "  跑 debug 模式看 raw PNG:"
+echo "    RAOQIU_PPTX_DEBUG=1 bash scripts/export-pptx.sh ..."
+echo "  PNG 会存到 /tmp/raoqiu-pptx-debug/ 一张一张可以单独看"
 echo "============================================================"

@@ -8,6 +8,64 @@
 
 ---
 
+## v5.4.1 · 2026-05-12(hotfix · PPTX 视觉问题修复)
+
+**主线**:v5.4.0 实测后饶秋发现 3 个问题,这次集中修。
+
+### 🛠️ 真实踩坑修复
+
+#### 修复 1 · 第 18 页 PROMPT TPL 02 跟标题重叠(动画半截被截图)
+
+**现象**:`scripts/export-pptx.sh` 跑完,某些页(尤其是有 prompt-block 的)出现两个元素重叠,像截图截到了动画过渡的中间状态。
+
+**根因**:截图前只等了 `400ms`,fadeIn 动画(.slide.active 切换)还没结束,**截图记录了动画过渡的瞬间**。
+
+**修正**:
+- `waitForTimeout(400)` → `1000`(等动画完全结束)
+- 加 `await page.evaluate(() => document.fonts.ready)`(等字体加载完,防止衬线字体没好就截图)
+
+#### 修复 2 · 截图内容不完整 / 边缘被裁
+
+**现象**:某些页内容看起来"截图没截完整"。
+
+**根因**:用了 `page.screenshot({ fullPage: false })`,截的是整个 viewport,如果 .slide 内容跟 viewport 边界对不齐就会有问题。
+
+**修正**:改用 **`element.screenshot('.slide.active')`** — 截 `.slide.active` 元素的精准 bounding box,**保证一定截到完整的当前页内容**。
+
+#### 修复 3 · 默认 1280×720(--compact)太挤
+
+**现象**:饶秋反馈"内容看起来不够占满全页"。
+
+**根因**:v5.4.0 用户跑的时候带了 `--compact` 参数(1280×720),**但模板某些版式(尤其 cols-3 9 卡片网格)在窄屏下视觉效果差** — padding 显得大,卡片显得挤。
+
+**修正**:**默认 1920×1080**(全高清),--compact 才是 1280×720。文件从 16M → 19M(可接受)。
+
+### ✨ 新增
+
+- **Debug 模式** `RAOQIU_PPTX_DEBUG=1`
+  - 跑 `RAOQIU_PPTX_DEBUG=1 bash scripts/export-pptx.sh ...`
+  - 每页 PNG 单独存到 `/tmp/raoqiu-pptx-debug/slide-XX.png`
+  - **用途**:如果某页 PPTX 里有问题,可以单独看 raw PNG,确认是截图问题还是 HTML 本身问题
+
+### 📌 未修复 / HTML 本身问题(不在脚本能管的范围)
+
+**用户反馈第 3 页"9 个模块"卡片网格,第 09 卡片"内容发布"文字 "公众号 / 小红书 / 视频号 / 海报 /..." 后面被裁切**。
+
+**根因**:**这是 HTML 模板本身的问题**(卡片固定高度 + cols-3 网格 + 文字过长)。**浏览器里看也是这样**,不是 PPTX 导出脚本的问题。
+
+**怎么解决**:用 v5.2 Inline Editing 在浏览器里按 E 进编辑模式,把那条文字改短(比如只留前 3 项),或者拆成两行。
+
+### Patch 范围
+
+`scripts/export-pptx.sh` 一个文件改动 · 4 个 patch 区段。
+
+### 测试状态
+
+- ✅ 重跑 v5.4.1 输出:`/Users/raoyuli/Desktop/AI应用基础课-v5.4.1-修复.pptx`(19M · 1920×1080)
+- ⏳ 等饶秋视觉验证
+
+---
+
 ## v5.4.0 · 2026-05-12(PPTX 导出能力 · alpha 图片版)
 
 **主线**:客户场景里有人**习惯用 PowerPoint / Keynote 改稿**,饶秋之前只能给 HTML 或 PDF — 给不出可编辑 .pptx。v5.4 加 `scripts/export-pptx.sh`,基于 Playwright 截图 + PptxGenJS 打包,**一键 HTML PPT → .pptx**。
