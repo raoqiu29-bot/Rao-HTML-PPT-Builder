@@ -186,6 +186,17 @@ Rao-HTML-PPT-Builder/
 - 5 分钟快速做完一份(这个 skill 强调工程纪律,慢工出细活)
 - 非 Mac 系统的自动化部分(scripts/ 依赖 macOS bash + Playwright)
 
+## Browser Compatibility / 浏览器兼容
+
+| Browser | Status | Notes |
+|---|---|---|
+| **Safari** | ✅ Recommended | macOS native WebKit, no extension interference. **Use this for live presentation.** |
+| **Chrome (Incognito)** | ✅ Works | Default-disabled extensions = clean environment |
+| **Chrome (Normal)** | ⚠️ Use with caution | Translation extensions (immersive translate / 沙拉查词), Vim keybindings (Vimium / Surfingkeys), userscript managers (Tampermonkey) may intercept keydown events and break pagination. If you see "progress bar moves but page doesn't change", disable extensions one by one to find the culprit. |
+| **Firefox / Edge** | 🟡 Untested | Should work (standard HTML5/CSS3/JS), but not verified |
+
+**Real-world lesson**: One author's Chrome had "progress bar animates but slides don't switch" because of a translation extension intercepting arrow keys. Same file in Safari worked perfectly. **Recommendation: use Safari for live training, Chrome for everyday browsing.**
+
 ---
 
 ## 版本
