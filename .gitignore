@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 编辑器配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 临时文件
+*.bak
+*.tmp
+*.log
+.~lock.*
+
+# Playwright 缓存
+node_modules/
+playwright-report/
+test-results/
+.cache/
+
+# Python 编译
+__pycache__/
+*.pyc
+*.pyo
+
+# 测试输出
+/tmp/
+*.output.html
+
+# 个人本地配置(如果以后有)
+.local/
+local-brand-styles/

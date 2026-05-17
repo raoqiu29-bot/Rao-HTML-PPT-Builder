@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>饶秋老师 HTML PPT 标准模板 · v5.1</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Noto+Serif+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   McKinsey 麦肯锡风 - 极深蓝 + 极简留白 + 全无衬线
+   ============================================================ */
+body.theme-mckinsey{
+  --c-bg:        #FFFFFF;
+  --c-bg-2:      #F5F5F5;
+  --c-bg-card:   #FFFFFF;
+  --c-bg-dark:   #051C2C;
+  --c-ink:       #051C2C;
+  --c-ink-2:     #2A3744;
+  --c-ink-3:     #5C6772;
+  --c-ink-4:     #9CA5AE;
+  --c-line:      #E5E7EB;
+  --c-line-2:    #CDD3DA;
+  --c-brand:     #051C2C;     /* 麦肯锡极深蓝 */
+  --c-brand-2:   #2251FF;     /* 锐蓝 */
+  --c-accent:    #2251FF;
+  --c-warm:      #E53935;
+  --c-deco:      rgba(5,28,44,0.05);
+  --c-deco-warm: rgba(229,57,53,0.05);
+}
+
+/* ============================================================
+   字体 + Cmd+/- 缩放友好
+   ============================================================ */
+:root{ font-size: 20px; }  /* v5-alpha 升级:17px → 20px(培训现场可读性优先,见 design-system.md "为什么 20px") */
+*{ box-sizing: border-box; margin: 0; padding: 0; }
+html, body{
+  width: 100%; height: 100%;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+body{
+  --f-zh: "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", sans-serif;
+  --f-en: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+  /* 衬线字体 (本次新增) - 仅用于 5 个重音版式 .serif-hero / .serif-quote 类 */
+  --f-serif-zh: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
+  --f-serif-en: "Fraunces", "Iowan Old Style", "Apple Garamond", serif;
+  --f-serif: var(--f-serif-en), var(--f-serif-zh);
+  --f-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+  font-family: var(--f-zh);
+}
+
+.brand-bar{
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 2px; background: var(--c-brand);
+  z-index: 1000;
+}
+.progress-bar{
+  position: fixed; top: 2px; left: 0;
+  height: 2px; background: var(--c-brand);
+  z-index: 1001; transition: width 0.4s ease;
+}
+
+/* ============================================================
+   舞台与单页
+   ============================================================ */
+.stage{
+  position: fixed; inset: 0;
+  overflow: hidden;
+  background: var(--c-bg);
+}
+.slide{
+  position: absolute; inset: 0;
+  display: none;
+  flex-direction: column;
+  background: var(--c-bg);
+  overflow: hidden;          /* v5 升级:严格 viewport fitting,不允许内部滚动 */
+  overflow-x: hidden;
+}
+/* v5 宽容开关:老课件如果内容溢出可临时启用滚动
+   用法:<body class="theme-mckinsey" data-strict-viewport="off">
+   建议:只用于过渡;长期方案是拆页 */
+body[data-strict-viewport="off"] .slide{
+  overflow-y: auto;
+}
+.slide.active{ display: flex; animation: fadeIn 0.35s ease; }
+@keyframes fadeIn{
+  from{ opacity: 0; transform: translateX(8px); }
+  to{ opacity: 1; transform: translateX(0); }
+}
+.slide.from-prev.active{ animation: fadeInR 0.35s ease; }
+@keyframes fadeInR{
+  from{ opacity: 0; transform: translateX(-8px); }
+  to{ opacity: 1; transform: translateX(0); }
+}
+
+/* ============================================================
+   通用页骨架 - 修复:page-body 内容垂直居中
+   ============================================================ */
+.page{
+  width: 100%; min-height: 100%;
+  padding: 3.5rem 5rem 2rem;
+  display: flex; flex-direction: column;
+  background: var(--c-bg);
+}
+.page-meta{
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--f-mono); font-size: 0.75rem;
+  color: var(--c-ink-4); letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid var(--c-line);
+  margin-bottom: 2rem;
+  flex-shrink: 0;
+}
+.page-meta .module{ color: var(--c-brand); font-weight: 600; }
+.page-title{
+  font-size: 2.25rem; font-weight: 700; line-height: 1.2;
+  color: var(--c-ink); letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+.page-subtitle{
+  font-size: 1.0625rem; color: var(--c-ink-3); font-weight: 400;
+  line-height: 1.55; margin-bottom: 1.5rem; max-width: 80%;
+  flex-shrink: 0;
+}
+.page-body{
+  flex: 1; min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;          /* 关键修复:内容垂直居中 */
+}
+/* v4 DEPRECATED · .page-footer 不再使用
+   原因:与 .nav-arrows(左下 fixed)和 .page-num(右下 fixed)固定 UI 重叠遮挡
+   品牌/模块/页码信息全部由顶部 .page-meta 承担,信息页不要再写 page-footer */
+.page-footer{ display: none !important; }
+
+/* ============================================================
+   版式 1: 封面
+   ============================================================ */
+.cover{
+  width: 100%; min-height: 100%;
+  background: var(--c-bg);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 4.5rem 6rem;
+  position: relative;
+}
+.cover::before{
+  content: ''; position: absolute; top: 4rem; left: 6rem;
+  width: 3rem; height: 2px; background: var(--c-brand);
+}
+.cover .eyebrow{
+  font-family: var(--f-mono); font-size: 0.8125rem;
+  color: var(--c-ink-3); letter-spacing: 0.2em;
+  text-transform: uppercase; margin-bottom: 2rem;
+}
+.cover h1{
+  font-family: var(--f-serif);
+  font-size: 4.25rem; font-weight: 600; line-height: 1.1;
+  color: var(--c-ink); letter-spacing: -0.02em;
+  margin-bottom: 1.5rem; max-width: 90%;
+}
+.cover .lead{
+  font-size: 1.375rem; line-height: 1.5; color: var(--c-ink-2);
+  font-weight: 400; max-width: 70%; margin-bottom: 4rem;
+}
+.cover .meta-grid{
+  display: grid; grid-template-columns: repeat(3, auto);
+  gap: 5rem; align-items: end;
+}
+.cover .meta-item .label{
+  font-family: var(--f-mono); font-size: 0.6875rem;
+  color: var(--c-ink-4); letter-spacing: 0.15em;
+  text-transform: uppercase; margin-bottom: 0.5rem;
+}
+.cover .meta-item .value{
+  font-size: 1.25rem; font-weight: 600; color: var(--c-ink);
+}
+
+/* ============================================================
+   版式 2: 章节分隔页 - McKinsey 风深蓝整页 + 白色铅字
+   ============================================================ */
+.chapter{
+  width: 100%; min-height: 100%;
+  background: var(--c-bg-dark);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 4.5rem 6rem;
+  position: relative; overflow: hidden;
+}
+.chapter .deco-num{
+  position: absolute; bottom: -2rem; right: -1rem;
+  font-family: var(--f-en); font-size: 26rem;
+  font-weight: 200; line-height: 0.85;
+  color: rgba(255,255,255,0.08);
+  letter-spacing: -0.05em;
+  pointer-events: none; user-select: none;
+}
+.chapter .ch-label{
+  font-family: var(--f-mono); font-size: 0.8125rem;
+  color: rgba(255,255,255,0.7); letter-spacing: 0.25em;
+  text-transform: uppercase; margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 1rem;
+  position: relative; z-index: 2;
+}
+.chapter .ch-label::before{
+  content: ''; width: 2.5rem; height: 1px; background: rgba(255,255,255,0.7);
+}
+.chapter h1{
+  font-family: var(--f-en);
+  font-size: 4.5rem; font-weight: 800; color: #fff;
+  letter-spacing: -0.02em; line-height: 1.1;
+  margin-bottom: 1.25rem; position: relative; z-index: 2;
+  max-width: 75%;
+}
+.chapter .desc{
+  font-size: 1.125rem; line-height: 1.6;
+  color: rgba(255,255,255,0.75); max-width: 55%;
+  position: relative; z-index: 2;
+}
+.chapter .ch-meta{
+  margin-top: 2.5rem;
+  display: flex; gap: 2rem;
+  font-family: var(--f-mono); font-size: 0.75rem;
+  color: rgba(255,255,255,0.5); letter-spacing: 0.1em;
+  text-transform: uppercase;
+  position: relative; z-index: 2;
+}
+.chapter .ch-meta strong{ color: rgba(255,255,255,0.9); font-weight: 500; }
+
+/* ============================================================
+   版式 3: 卡片网格(修复了空白堆顶部问题)
+   ============================================================ */
+.card-grid{ display: grid; gap: 1rem; }
+.card-grid.cols-2{ grid-template-columns: repeat(2, 1fr); }
+.card-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+.card-grid.cols-4{ grid-template-columns: repeat(4, 1fr); }
+
+.card{
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-line);
+  border-radius: 3px;
+  padding: 1.4rem;
+  display: flex; flex-direction: column;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.card.bordered-top{ border-top: 3px solid var(--c-brand); padding-top: 1.25rem; }
+.card.bordered-left{ border-left: 3px solid var(--c-brand); padding-left: 1.25rem; }
+.card .card-num{
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-brand); font-weight: 600;
+  letter-spacing: 0.12em; margin-bottom: 0.75rem;
+}
+.card h3{
+  font-size: 1.125rem; font-weight: 700;
+  color: var(--c-ink); margin-bottom: 0.5rem;
+  letter-spacing: -0.01em; line-height: 1.3;
+}
+.card p{
+  font-size: 0.875rem; line-height: 1.65;
+  color: var(--c-ink-2); margin: 0;
+}
+.card.dark{
+  background: var(--c-bg-dark);
+  border-color: var(--c-bg-dark);
+}
+.card.dark h3{ color: #fff; }
+.card.dark p{ color: rgba(255,255,255,0.78); }
+.card.dark .card-num{ color: rgba(255,255,255,0.55); }
+
+.card.mini{ padding: 1rem 1.1rem; }
+.card.mini .card-num{ font-size: 0.65rem; margin-bottom: 0.5rem; }
+.card.mini h3{ font-size: 1rem; margin-bottom: 0.35rem; }
+.card.mini p{ font-size: 0.8125rem; line-height: 1.55; }
+
+.card.warm-mark{ border-left: 3px solid var(--c-warm); padding-left: 1.25rem; }
+.card.warm-mark .card-num{ color: var(--c-warm); }
+
+/* ============================================================
+   版式 4: 数据 + 分栏对比
+   ============================================================ */
+.split{ display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+.split .col h4{
+  font-family: var(--f-mono); font-size: 0.75rem;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--c-ink-3); margin-bottom: 1rem;
+  padding-bottom: 0.75rem; border-bottom: 1px solid var(--c-line);
+}
+.split .col.brand h4{ color: var(--c-brand); }
+.list-clean{ list-style: none; padding: 0; margin: 0; counter-reset: li-counter; }
+.list-clean li{
+  font-size: 0.95rem; line-height: 1.65; color: var(--c-ink-2);
+  padding: 0.5rem 0; border-bottom: 1px dashed var(--c-line);
+  display: flex; align-items: baseline; gap: 1rem;
+}
+.list-clean li::before{
+  content: counter(li-counter, decimal-leading-zero);
+  counter-increment: li-counter;
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-4); flex-shrink: 0; min-width: 1.5rem;
+}
+
+.metric-row{ display: flex; gap: 4rem; margin-bottom: 2rem; }
+.metric .v{
+  font-family: var(--f-en); font-size: 3.25rem; font-weight: 800;
+  color: var(--c-brand); letter-spacing: -0.03em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.metric .v .unit{ font-size: 1.4rem; color: var(--c-ink-3); margin-left: 0.25rem; }
+.metric .l{
+  font-family: var(--f-mono); font-size: 0.7rem;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--c-ink-3); margin-top: 0.5rem;
+}
+
+/* ============================================================
+   版式 5: Key Insight 关键洞察(替代金句页)
+   McKinsey 报告里没有"金句",有的是带数据来源的洞察标注
+   ============================================================ */
+.insight-page{
+  width: 100%; min-height: 100%;
+  background: var(--c-bg);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 4.5rem 7rem;
+  position: relative;
+}
+.insight-page .insight-tag{
+  display: inline-flex; align-items: center; gap: 0.75rem;
+  font-family: var(--f-mono); font-size: 0.75rem;
+  color: var(--c-warm); letter-spacing: 0.2em;
+  text-transform: uppercase; font-weight: 600;
+  margin-bottom: 1.75rem;
+}
+.insight-page .insight-tag::before{
+  content: ''; width: 1.5rem; height: 2px; background: var(--c-warm);
+}
+.insight-page .insight-body{
+  border-left: 3px solid var(--c-brand);
+  padding-left: 2rem;
+  max-width: 80%;
+}
+.insight-page .insight-body p{
+  font-size: 2.25rem; font-weight: 700; line-height: 1.35;
+  color: var(--c-ink); letter-spacing: -0.015em;
+  margin: 0;
+}
+.insight-page .insight-meta{
+  margin-top: 2.5rem;
+  display: flex; gap: 3rem;
+  padding-left: 2rem;
+}
+.insight-page .insight-meta .item{
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-3); letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.insight-page .insight-meta .item strong{
+  display: block; font-size: 1.0625rem; font-weight: 700;
+  color: var(--c-brand); margin-top: 0.4rem;
+  letter-spacing: -0.01em; text-transform: none;
+}
+.insight-page .insight-source{
+  position: absolute; bottom: 3rem; left: 7rem;
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-4); letter-spacing: 0.05em;
+}
+.insight-page .insight-source::before{
+  content: 'SOURCE / '; color: var(--c-ink-3); font-weight: 600;
+}
+
+/* v5-beta · 通用数据来源标签(metric-row / split / callout / card 用)
+   用法:<span class="data-source">8 家企业 · 2025-2026</span>
+   自动加前缀 "SOURCE / " · 不要在文本里再写 SOURCE */
+.data-source{
+  display: inline-block;
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-4); letter-spacing: 0.05em;
+  margin-top: 0.5rem;
+}
+.data-source::before{
+  content: 'SOURCE / '; color: var(--c-ink-3); font-weight: 600;
+}
+/* 块级版本(独占一行,跟内容隔开) */
+.data-source-block{
+  display: block;
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-4); letter-spacing: 0.05em;
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--c-line);
+}
+.data-source-block::before{
+  content: 'SOURCE / '; color: var(--c-ink-3); font-weight: 600;
+}
+
+/* ============================================================
+   版式 6: 结尾
+   ============================================================ */
+.ending{
+  width: 100%; min-height: 100%;
+  background: var(--c-bg);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 4.5rem 6rem;
+  position: relative; overflow: hidden;
+}
+.ending .deco-num{
+  position: absolute; bottom: -2rem; right: -1rem;
+  font-family: var(--f-en); font-size: 18rem;
+  font-weight: 200; line-height: 0.85;
+  color: var(--c-deco); letter-spacing: -0.05em;
+  pointer-events: none; user-select: none;
+}
+.ending .eyebrow{
+  font-family: var(--f-mono); font-size: 0.8125rem;
+  color: var(--c-brand); letter-spacing: 0.25em;
+  text-transform: uppercase; margin-bottom: 2rem;
+  position: relative; z-index: 2;
+  display: flex; align-items: center; gap: 1rem;
+}
+.ending .eyebrow::before{
+  content: ''; width: 2.5rem; height: 1px; background: var(--c-brand);
+}
+.ending h1{
+  font-family: var(--f-serif);
+  font-size: 4.5rem; font-weight: 500; color: var(--c-ink);
+  letter-spacing: -0.02em; line-height: 1.1;
+  margin-bottom: 1.5rem; position: relative; z-index: 2;
+  max-width: 80%;
+}
+.ending .lead{
+  font-size: 1.25rem; color: var(--c-ink-2);
+  line-height: 1.55; max-width: 70%; margin-bottom: 4rem;
+  position: relative; z-index: 2;
+}
+.ending .signature{
+  display: flex; gap: 5rem; align-items: end;
+  padding-top: 1.5rem; border-top: 1px solid var(--c-line);
+  position: relative; z-index: 2;
+}
+.ending .signature .label{
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-4); letter-spacing: 0.15em;
+  text-transform: uppercase; margin-bottom: 0.5rem;
+}
+.ending .signature .value{
+  font-size: 1.25rem; font-weight: 600; color: var(--c-ink);
+}
+
+/* ============================================================
+   ★ 新版式 1: 学员任务卡(Task Card)
+   ============================================================ */
+.task-card{
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2.5rem;
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-line);
+  padding: 2rem;
+}
+.task-card .left{ display: flex; flex-direction: column; gap: 1.25rem; }
+.task-card .right{
+  display: flex; flex-direction: column;
+  border-left: 1px solid var(--c-line);
+  padding-left: 2.5rem;
+  gap: 1.25rem;
+}
+.task-card-header{
+  display: flex; align-items: baseline; gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--c-line);
+}
+.task-card-header .num{
+  font-family: var(--f-en); font-size: 2.5rem; font-weight: 800;
+  color: var(--c-brand); letter-spacing: -0.03em; line-height: 1;
+}
+.task-card-header .name{
+  font-size: 1.125rem; font-weight: 700; color: var(--c-ink);
+}
+.task-card-header .name small{
+  display: block;
+  font-family: var(--f-mono); font-size: 0.7rem; font-weight: 400;
+  color: var(--c-ink-4); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-top: 0.25rem;
+}
+.task-block h5{
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-3); letter-spacing: 0.15em;
+  text-transform: uppercase; margin-bottom: 0.5rem;
+}
+.task-block p, .task-block li{
+  font-size: 0.95rem; line-height: 1.6; color: var(--c-ink-2);
+}
+.task-block ul, .task-block ol{ padding-left: 1.25rem; }
+.task-block ul li, .task-block ol li{ margin-bottom: 0.35rem; }
+.task-card .timer{
+  margin-top: auto;
+  font-family: var(--f-en); font-size: 2rem; font-weight: 700;
+  color: var(--c-warm); letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.task-card .timer small{
+  display: block;
+  font-family: var(--f-mono); font-size: 0.7rem; font-weight: 400;
+  color: var(--c-ink-4); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-top: 0.25rem;
+}
+
+/* ============================================================
+   ★ 新版式 2: 提示词代码块(Prompt Block)
+   ============================================================ */
+.prompt-block{
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-line);
+  border-left: 3px solid var(--c-brand);
+  border-radius: 2px;
+  padding: 1.5rem 1.75rem;
+  font-family: var(--f-mono);
+  font-size: 0.875rem; line-height: 1.7;
+  color: var(--c-ink-2);
+  position: relative;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.prompt-block .prompt-tag{
+  position: absolute; top: -0.625rem; left: 1.5rem;
+  background: var(--c-brand); color: #fff;
+  padding: 0.125rem 0.5rem; border-radius: 2px;
+  font-size: 0.65rem; letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.prompt-block .ph{
+  display: inline-block;
+  background: var(--c-deco-warm); color: var(--c-warm);
+  padding: 0.05rem 0.35rem; border-radius: 2px;
+  font-weight: 600;
+}
+.prompt-block .num-line{
+  font-family: var(--f-mono); color: var(--c-ink-4);
+  font-size: 0.7rem; letter-spacing: 0.05em;
+  user-select: none; margin-right: 1rem;
+}
+.prompt-meta{
+  display: flex; gap: 1.5rem; margin-top: 1rem;
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-3); letter-spacing: 0.05em;
+}
+.prompt-meta strong{ color: var(--c-brand); margin-right: 0.4rem; }
+
+/* ============================================================
+   ★ 新版式 3: 2x2 战略矩阵(McKinsey 灵魂版式)
+   ============================================================ */
+.matrix-2x2{
+  display: grid;
+  grid-template-columns: 6rem 1fr 1fr;
+  grid-template-rows: 1fr 1fr 4rem;
+  gap: 0;
+  height: 100%;
+  position: relative;
+}
+.matrix-2x2 .y-axis{
+  grid-column: 1; grid-row: 1 / 3;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding-right: 1rem; align-items: flex-end;
+  border-right: 2px solid var(--c-brand);
+}
+.matrix-2x2 .y-axis .y-label{
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-3); letter-spacing: 0.1em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  align-self: center;
+}
+.matrix-2x2 .y-axis .y-tip-top,
+.matrix-2x2 .y-axis .y-tip-bottom{
+  font-family: var(--f-mono); font-size: 0.65rem;
+  color: var(--c-ink-4); letter-spacing: 0.08em;
+}
+.matrix-2x2 .x-axis{
+  grid-column: 2 / 4; grid-row: 3;
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 2px solid var(--c-brand);
+  padding-top: 0.75rem;
+}
+.matrix-2x2 .x-axis .x-label{
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-3); letter-spacing: 0.1em;
+  text-transform: uppercase; flex: 1; text-align: center;
+}
+.matrix-2x2 .x-axis .x-tip-left,
+.matrix-2x2 .x-axis .x-tip-right{
+  font-family: var(--f-mono); font-size: 0.65rem;
+  color: var(--c-ink-4); letter-spacing: 0.08em;
+}
+.matrix-2x2 .quadrant{
+  border: 1px solid var(--c-line);
+  background: var(--c-bg-card);
+  padding: 1.25rem 1.4rem;
+  display: flex; flex-direction: column;
+}
+.matrix-2x2 .quadrant.highlight{
+  border: 2px solid var(--c-brand);
+  background: var(--c-deco);
+}
+.matrix-2x2 .quadrant.highlight h4{ color: var(--c-brand); }
+.matrix-2x2 .quadrant h4{
+  font-size: 1rem; font-weight: 700;
+  color: var(--c-ink); margin-bottom: 0.4rem;
+  letter-spacing: -0.01em;
+}
+.matrix-2x2 .quadrant .q-tag{
+  font-family: var(--f-mono); font-size: 0.65rem;
+  color: var(--c-ink-4); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 0.5rem;
+}
+.matrix-2x2 .quadrant p{
+  font-size: 0.875rem; line-height: 1.6;
+  color: var(--c-ink-2); margin: 0;
+}
+
+/* ============================================================
+   ★ 新版式 4: 横向流程时间线(McKinsey Process Flow)
+   ============================================================ */
+.process-flow{
+  display: grid;
+  grid-template-columns: repeat(var(--steps, 5), 1fr);
+  gap: 0;
+  position: relative;
+  padding: 2rem 0;
+}
+.process-flow::before{
+  content: '';
+  position: absolute;
+  top: 3.4rem; left: 0; right: 0;
+  height: 1px; background: var(--c-line-2);
+  z-index: 0;
+}
+.process-flow .step{
+  display: flex; flex-direction: column;
+  align-items: flex-start;
+  padding-right: 1.25rem;
+  position: relative; z-index: 1;
+}
+.process-flow .step .dot{
+  width: 1.5rem; height: 1.5rem;
+  border-radius: 50%;
+  background: var(--c-bg);
+  border: 2px solid var(--c-brand);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--f-mono); font-size: 0.65rem; font-weight: 700;
+  color: var(--c-brand);
+  margin: 1.25rem 0 1.25rem 0;
+}
+.process-flow .step.active .dot{
+  background: var(--c-brand); color: #fff;
+}
+.process-flow .step .step-num{
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-brand); letter-spacing: 0.1em;
+  font-weight: 600; margin-bottom: 0.25rem;
+}
+.process-flow .step h4{
+  font-size: 1.0625rem; font-weight: 700;
+  color: var(--c-ink); margin-bottom: 0.4rem;
+  letter-spacing: -0.01em; line-height: 1.3;
+}
+.process-flow .step p{
+  font-size: 0.875rem; line-height: 1.6;
+  color: var(--c-ink-2); margin: 0;
+}
+
+/* ============================================================
+   小元素
+   ============================================================ */
+.kbd{
+  font-family: var(--f-mono); font-size: 0.75rem;
+  padding: 0.125rem 0.4rem; background: var(--c-bg-2);
+  border: 1px solid var(--c-line); border-radius: 3px;
+  color: var(--c-ink-2);
+}
+.hl-brand{ color: var(--c-brand); font-weight: 600; }
+.hl-warm{ color: var(--c-warm); font-weight: 600; }
+
+/* ============================================================
+   控件 / 主题切换 / 大纲 / 提示
+   ============================================================ */
+.ctrl-bar{
+  position: fixed; top: 1rem; right: 1.5rem;
+  z-index: 1100; display: flex; gap: 0.5rem; align-items: center;
+}
+.ctrl-btn{
+  background: var(--c-bg-card);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--c-line);
+  color: var(--c-ink-2);
+  font-family: var(--f-mono); font-size: 0.7rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.45rem 0.8rem; border-radius: 3px; cursor: pointer;
+  transition: all 0.2s;
+}
+.ctrl-btn:hover{ background: var(--c-brand); color: #fff; border-color: var(--c-brand); }
+.theme-switcher{
+  display: flex; border: 1px solid var(--c-line); border-radius: 3px;
+  background: var(--c-bg-card); overflow: hidden;
+}
+.theme-switcher button{
+  background: transparent; border: none; cursor: pointer;
+  padding: 0.45rem 0.75rem; font-family: var(--f-mono); font-size: 0.65rem;
+  letter-spacing: 0.05em; color: var(--c-ink-3);
+  border-right: 1px solid var(--c-line);
+  transition: all 0.2s;
+}
+.theme-switcher button:last-child{ border-right: none; }
+.theme-switcher button.on{ background: var(--c-brand); color: #fff; }
+
+.page-num{
+  position: fixed; bottom: 1rem; right: 1.5rem; z-index: 1100;
+  font-family: var(--f-mono); font-size: 0.75rem;
+  color: var(--c-ink-4); letter-spacing: 0.1em;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(4px);
+  padding: 0.25rem 0.6rem; border-radius: 3px;
+}
+.nav-arrows{
+  position: fixed; bottom: 1rem; left: 1.5rem; z-index: 1100;
+  display: flex; gap: 0.4rem;
+}
+.nav-arrows button{
+  background: var(--c-bg-card);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--c-line);
+  color: var(--c-ink-2); cursor: pointer;
+  width: 2rem; height: 2rem;
+  font-size: 0.875rem;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.nav-arrows button:hover{ background: var(--c-brand); color: #fff; border-color: var(--c-brand); }
+
+#hint{
+  position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%);
+  z-index: 1100;
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-3); letter-spacing: 0.05em;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
+  padding: 0.4rem 0.85rem; border-radius: 3px;
+  border: 1px solid var(--c-line);
+  opacity: 0; transition: opacity 0.4s;
+  white-space: nowrap;
+}
+#hint.show{ opacity: 1; }
+
+/* TOC 大纲面板 */
+#toc-overlay{
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(12px);
+  display: none; align-items: stretch; justify-content: center;
+}
+#toc-overlay.active{ display: flex; }
+#toc-panel{
+  background: var(--c-bg);
+  width: 100%; max-width: 52rem;
+  margin: 2.5rem;
+  border: 1px solid var(--c-line);
+  display: flex; flex-direction: column;
+  box-shadow: 0 1.5rem 3rem rgba(0,0,0,0.25);
+  overflow: hidden;
+}
+#toc-header{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--c-line);
+}
+#toc-header h2{
+  font-family: var(--f-en); font-size: 1.125rem; font-weight: 700;
+  color: var(--c-ink); letter-spacing: -0.01em;
+}
+#toc-close{
+  background: none; border: none; font-size: 1.5rem;
+  color: var(--c-ink-3); cursor: pointer; padding: 0;
+  width: 2rem; height: 2rem; line-height: 1;
+}
+#toc-close:hover{ color: var(--c-ink); }
+#toc-list{ flex: 1; overflow-y: auto; padding: 0.75rem 0; max-height: 70vh; }
+.toc-item{
+  display: grid;
+  grid-template-columns: 2rem 3rem 1fr 1.5rem;
+  align-items: center; gap: 1rem;
+  padding: 0.75rem 2rem; cursor: grab;
+  border-bottom: 1px solid var(--c-line);
+  transition: background 0.15s;
+  user-select: none;
+}
+.toc-item:last-child{ border-bottom: none; }
+.toc-item:hover{ background: var(--c-bg-2); }
+.toc-item.dragging{ opacity: 0.4; cursor: grabbing; }
+.toc-item.drag-over{ border-top: 2px solid var(--c-brand); }
+.toc-item .grip{
+  color: var(--c-ink-4); font-size: 0.875rem;
+  font-family: var(--f-mono);
+}
+.toc-item .num{
+  font-family: var(--f-mono); font-size: 0.8125rem;
+  color: var(--c-ink-3); font-weight: 500;
+}
+.toc-item .label .module{
+  display: inline-block;
+  font-family: var(--f-mono); font-size: 0.625rem;
+  color: var(--c-brand); background: var(--c-deco);
+  padding: 0.125rem 0.4rem; border-radius: 2px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  margin-right: 0.625rem;
+}
+.toc-item .label .name{
+  font-family: var(--f-zh); font-size: 0.875rem;
+  color: var(--c-ink); font-weight: 500;
+}
+.toc-item .jump{
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-4); opacity: 0; transition: opacity 0.15s;
+}
+.toc-item:hover .jump{ opacity: 1; }
+#toc-footer{
+  padding: 1rem 2rem; border-top: 1px solid var(--c-line);
+  font-family: var(--f-mono); font-size: 0.7rem;
+  color: var(--c-ink-4); letter-spacing: 0.05em;
+  display: flex; justify-content: space-between;
+}
+
+/* 概览模式 */
+#overview{
+  position: fixed; inset: 0; z-index: 1900;
+  background: var(--c-bg);
+  display: none;
+  padding: 4rem 3rem 3rem;
+  overflow-y: auto;
+}
+#overview.active{ display: block; }
+#overview h2{
+  font-family: var(--f-en); font-size: 1.125rem; font-weight: 700;
+  color: var(--c-ink); margin-bottom: 1.5rem; letter-spacing: -0.01em;
+}
+#overview .grid{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.thumb{
+  aspect-ratio: 16/9;
+  border: 1px solid var(--c-line); cursor: pointer;
+  background: var(--c-bg-card);
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 1rem;
+  transition: all 0.2s;
+}
+.thumb:hover{ border-color: var(--c-brand); transform: translateY(-2px); }
+.thumb .thumb-num{
+  position: absolute; top: 0.4rem; left: 0.5rem;
+  font-family: var(--f-mono); font-size: 0.65rem;
+  color: var(--c-ink-4); letter-spacing: 0.1em;
+}
+.thumb .thumb-mod{
+  position: absolute; top: 0.4rem; right: 0.5rem;
+  font-family: var(--f-mono); font-size: 0.6rem;
+  color: var(--c-brand); letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.thumb .thumb-name{
+  font-size: 0.875rem; font-weight: 500; color: var(--c-ink);
+  line-height: 1.4;
+}
+
+@media print{
+  .ctrl-bar, .nav-arrows, .page-num, #hint, #toc-overlay, #overview, .progress-bar, .bg-fbm{ display: none !important; }
+  .slide{ display: flex !important; page-break-after: always; position: relative; }
+}
+
+/* ============================================================
+   v4 新增 · 衬线字体类(仅用于 5 个重音版式)
+   红线:不要在卡片/正文/内页用 .serif-hero / .serif-quote
+   只允许:.cover .h1 / .chapter .h1 / .insight-body / .big-quote .quote / .big-number .v
+   ============================================================ */
+.serif-hero{
+  font-family: var(--f-serif-zh), var(--f-serif-en);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-feature-settings: "ss01", "kern", "palt";
+}
+.serif-quote{
+  font-family: var(--f-serif-zh), var(--f-serif-en);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+  font-feature-settings: "ss01", "kern", "palt";
+}
+
+/* ============================================================
+   v4 新增 · Big Number 整页大数字版式
+   ============================================================ */
+.big-number{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4rem 6rem;
+  gap: 1.25rem;
+}
+.big-number .kicker{
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--c-ink-3);
+  text-transform: uppercase;
+}
+.big-number .v{
+  font-size: clamp(8rem, 22vw, 22rem);
+  font-weight: 600;
+  line-height: 0.95;
+  color: var(--c-ink);
+  letter-spacing: -0.04em;
+  font-variant-numeric: lining-nums;
+  margin: 0.5rem 0;
+}
+.big-number .v.serif-quote{
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+.big-number .lead{
+  font-size: 1.5rem;
+  line-height: 1.5;
+  color: var(--c-ink-2);
+  max-width: 32em;
+  font-weight: 400;
+  margin-top: 0.5rem;
+}
+.big-number .source{
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--c-ink-4);
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+}
+
+/* ============================================================
+   v4 新增 · Big Quote 整页大引用版式
+   ============================================================ */
+.big-quote{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4rem 7rem;
+  gap: 1.5rem;
+}
+.big-quote .kicker{
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--c-ink-3);
+  text-transform: uppercase;
+}
+.big-quote .quote{
+  font-size: clamp(2.5rem, 6.5vw, 5.6rem);
+  line-height: 1.2;
+  color: var(--c-ink);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  max-width: 18em;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.big-quote .attribution{
+  font-family: var(--f-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: var(--c-ink-3);
+  margin-top: 0.5rem;
+}
+.big-quote .aside{
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--c-ink-3);
+  max-width: 36em;
+  margin-top: 1rem;
+}
+
+/* ============================================================
+   v4 新增 · FBM 纸感纹理背景(默认关闭)
+   开启:<body class="theme-mckinsey" data-bg="fbm">
+   仅 AIGC 培训/分享场景按需开启,客户提案/PDF 输出务必关闭
+   ============================================================ */
+.bg-fbm{
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  display: none;
+  background-color: var(--c-bg);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' seed='5'/><feColorMatrix values='0 0 0 0 0.05  0 0 0 0 0.11  0 0 0 0 0.17  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 420px 420px;
+  background-repeat: repeat;
+  opacity: 0.55;
+}
+body[data-bg="fbm"] .bg-fbm{ display: block; }
+
+/* ============================================================
+   v5 升级 · Viewport Fitting Base
+   借鉴 zarazhangrui/frontend-slides 的 viewport-base.css 4 段精华
+   ============================================================ */
+
+/* === v5-base #1 · clamp() viewport-aware 工具变量(可选使用,不强制) ===
+   现有 rem 字号保留(向后兼容 + 支持 Cmd+/- 缩放)
+   这些 --vp-* 变量是给新版式 / 新 PPT 用,自动适应屏幕大小 */
+:root {
+  --vp-title:    clamp(2rem, 5vw, 4.5rem);    /* 主标题(对应 cover/chapter h1) */
+  --vp-h2:       clamp(1.5rem, 3.5vw, 2.5rem); /* 二级标题(对应 page-title) */
+  --vp-h3:       clamp(1rem, 1.5vw, 1.25rem);  /* 卡片标题 */
+  --vp-body:     clamp(0.875rem, 1.2vw, 1.0625rem); /* 正文 */
+  --vp-small:    clamp(0.7rem, 0.9vw, 0.85rem);     /* 小字 / 标签 */
+  --vp-padding:  clamp(2rem, 4vw, 5rem);            /* 页面 padding */
+  --vp-gap:      clamp(0.5rem, 1.2vw, 1.25rem);     /* 元素间距 */
+}
+
+/* === v5-base #2 · prefers-reduced-motion 无障碍支持 ===
+   用户在系统里开了"减少动效"时,自动尊重 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.2s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* === v5-base #3 · 多档断点 · 小屏自动缩放和隐藏装饰 === */
+
+/* 短 viewport(<= 700px height,投影 / 4:3 旧屏 / 平板横屏) */
+@media (max-height: 700px) {
+  .page { padding: 2rem 3rem 1rem; }
+  .chapter { padding: 3rem 4rem; }
+  .cover .h1, .chapter .h1 { font-size: 3.5rem; }
+  .page-title { font-size: 1.875rem; }
+  .deco-num { font-size: 18rem; }
+}
+
+/* 很短 viewport(<= 600px height,笔记本横屏 / 投影边缘) */
+@media (max-height: 600px) {
+  .page { padding: 1.5rem 2.5rem 0.875rem; }
+  .chapter { padding: 2.5rem 3.5rem; }
+  .cover .h1, .chapter .h1 { font-size: 3rem; }
+  .page-title { font-size: 1.625rem; }
+  .deco-num { font-size: 14rem; }
+  /* 极小屏 hide 非核心装饰 */
+  .brand-bar, .progress-bar { display: none; }
+}
+
+/* 极短 viewport(<= 500px height,手机横屏看预览) */
+@media (max-height: 500px) {
+  .page { padding: 1rem 2rem 0.5rem; }
+  .cover .h1, .chapter .h1 { font-size: 2.25rem; }
+  .page-title { font-size: 1.375rem; }
+  .deco-num { display: none; }
+  /* 极小屏隐藏控件(用户已经看不清,翻页就行) */
+  .ctrl-bar { display: none; }
+}
+
+/* 窄 viewport(<= 600px width,手机竖屏) */
+@media (max-width: 600px) {
+  .card-grid.cols-2,
+  .card-grid.cols-3,
+  .card-grid.cols-4 {
+    grid-template-columns: 1fr;  /* 单列堆叠 */
+  }
+  .split { grid-template-columns: 1fr; }
+}
+
+/* === v5-base #4 · 图片硬限制 ===
+   防止图片撑破 viewport · 借鉴 frontend-slides 的 max-height: min(50vh, 400px) */
+.page img,
+.page-body img,
+.cover img,
+.chapter img {
+  max-width: 100%;
+  max-height: min(50vh, 400px);
+  object-fit: contain;
+}
+
+/* 网格内图片(.frame-img)在 cards/grid 里保持原有 height:Nvh 控制,不被这条影响 */
+.card img,
+.frame-img img {
+  max-height: none;  /* 让容器自己控制 */
+}
+
+/* === v5-base #5 · scroll-snap-type fallback ===
+   即使 JS 翻页失效,鼠标滚轮也能 snap 到下一页 */
+.stage {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+.slide {
+  scroll-snap-align: start;
+}
+
+
+/* ============================================================
+   v5.1 双主题切换 · Paper & Ink + Dark Botanical
+   ============================================================
+   默认行为(向后兼容):
+   - body 没有 data-theme 属性 → 显示 McKinsey 深蓝(v5.0 原默认)
+
+   新主题 override:
+   - <body data-theme="paper"> → Paper & Ink 纸墨白底衬线风
+   - <body data-theme="dark">  → Dark Botanical 暗色艺术风
+
+   切换方式:
+   - 点击右上角"纸 · 墨"按钮
+   - 按 T 键快捷键
+   - localStorage 记忆,刷新延续
+
+   ⚠ 生成新 PPT 时,饶秋偏好默认给 body 加 data-theme="paper"
+   ============================================================ */
+
+/* ============================================================
+   Paper & Ink 纸墨主题 · [data-theme="paper"]
+   ============================================================ */
+body[data-theme="paper"]{
+  --c-bg: #faf9f7;
+  --c-bg-2: #f0ede5;
+  --c-bg-card: #ffffff;
+  --c-bg-dark: #1a1a1a;
+  --c-ink: #1a1a1a;
+  --c-ink-2: #2a2a2a;
+  --c-ink-3: #555555;
+  --c-ink-4: #888888;
+  --c-line: #d8d0c0;
+  --c-line-2: #e8e0d0;
+  --c-brand: #1a1a1a;
+  --c-brand-2: #c41e3a;
+  --c-accent: #c41e3a;
+  --c-warm: #c41e3a;
+  --f-zh: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+  --f-en: "Source Serif 4", "Cormorant Garamond", Georgia, serif;
+}
+body[data-theme="paper"],
+body[data-theme="paper"] .slide,
+body[data-theme="paper"] .page,
+body[data-theme="paper"] .stage{ background: #faf9f7 !important; }
+body[data-theme="paper"]{
+  font-family: "Noto Serif SC", "Source Serif 4", serif;
+}
+body[data-theme="paper"] p,
+body[data-theme="paper"] .card p,
+body[data-theme="paper"] .page-subtitle{
+  font-family: "Noto Serif SC", "Source Serif 4", serif;
+}
+body[data-theme="paper"] .cover h1,
+body[data-theme="paper"] .chapter h1,
+body[data-theme="paper"] .ending h1,
+body[data-theme="paper"] .page-title{
+  font-family: "Cormorant Garamond", "Noto Serif SC", Georgia, serif !important;
+  font-weight: 600 !important;
+  font-style: italic !important;
+  letter-spacing: -0.005em;
+}
+body[data-theme="paper"] .chapter{ background: #1a1a1a !important; }
+body[data-theme="paper"] .card{
+  background: #ffffff !important;
+  border-radius: 2px;
+  border-top: 2px solid #1a1a1a;
+}
+body[data-theme="paper"] .card-num,
+body[data-theme="paper"] .page-meta .module{
+  color: #c41e3a !important;
+  font-style: italic;
+}
+body[data-theme="paper"] .insight-tag{
+  background: #c41e3a !important; color: #ffffff !important;
+  border-radius: 2px;
+}
+body[data-theme="paper"] .insight-body{
+  font-family: "Cormorant Garamond", "Noto Serif SC", serif !important;
+  font-style: italic !important;
+  font-weight: 500 !important;
+}
+body[data-theme="paper"] .big-quote .quote{
+  font-family: "Cormorant Garamond", "Noto Serif SC", serif !important;
+  font-style: italic !important;
+  font-weight: 500 !important;
+  position: relative;
+}
+body[data-theme="paper"] .big-quote .quote::before{
+  content: "\201C"; position: absolute; top: -2rem; left: -2rem;
+  font-size: 6rem; color: #c41e3a; opacity: 0.3;
+  font-family: Georgia, serif;
+}
+body[data-theme="paper"] .bg-fbm{ opacity: 0.8 !important; }
+
+/* ============================================================
+   Dark Botanical 暗色植物主题 · [data-theme="dark"]
+   ============================================================ */
+body[data-theme="dark"]{
+  --c-bg: #0f0f0f;
+  --c-bg-2: #1a1a1a;
+  --c-bg-card: #1f1f1f;
+  --c-bg-dark: #0a0a0a;
+  --c-ink: #e8e4df;
+  --c-ink-2: #c0bcb7;
+  --c-ink-3: #9a9590;
+  --c-ink-4: #6a6560;
+  --c-line: #2a2a2a;
+  --c-line-2: #1f1f1f;
+  --c-brand: #d4a574;
+  --c-brand-2: #e8b4b8;
+  --c-accent: #d4a574;
+  --c-warm: #c9b896;
+  --f-zh: "Noto Serif SC", "Source Han Serif SC", serif;
+  --f-en: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+}
+body[data-theme="dark"],
+body[data-theme="dark"] .slide,
+body[data-theme="dark"] .page,
+body[data-theme="dark"] .stage{
+  background: #0f0f0f !important;
+  color: #e8e4df !important;
+}
+body[data-theme="dark"] .page-title,
+body[data-theme="dark"] .cover h1,
+body[data-theme="dark"] .chapter h1,
+body[data-theme="dark"] .ending h1{
+  color: #e8e4df !important;
+  font-family: "Cormorant Garamond", "Noto Serif SC", serif !important;
+  font-style: italic !important;
+  font-weight: 500 !important;
+}
+body[data-theme="dark"] .page-subtitle{ color: #c0bcb7 !important; }
+body[data-theme="dark"] p,
+body[data-theme="dark"] .card p,
+body[data-theme="dark"] .card h3{ color: #c0bcb7 !important; }
+body[data-theme="dark"] .card h3{ color: #e8e4df !important; }
+body[data-theme="dark"] .card{
+  background: #1f1f1f !important;
+  border-top: 1px solid #d4a574 !important;
+  border-radius: 6px;
+}
+body[data-theme="dark"] .card.warm-mark{
+  border-top: 1px solid #e8b4b8 !important;
+  border-left: none !important;
+}
+body[data-theme="dark"] .card.dark{ background: #0a0a0a !important; }
+body[data-theme="dark"] .chapter{
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
+}
+body[data-theme="dark"] .insight-page,
+body[data-theme="dark"] .big-quote,
+body[data-theme="dark"] .big-number{ background: #0f0f0f !important; }
+/* hero 页发光圆装饰 */
+body[data-theme="dark"] .cover,
+body[data-theme="dark"] .chapter,
+body[data-theme="dark"] .ending{ position: relative; }
+body[data-theme="dark"] .cover::before,
+body[data-theme="dark"] .chapter::before,
+body[data-theme="dark"] .ending::before{
+  content: ""; position: absolute; top: 8%; right: 8%;
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(232,180,184,0.25) 0%, transparent 70%);
+  border-radius: 50%; filter: blur(50px);
+  pointer-events: none; z-index: 0;
+}
+body[data-theme="dark"] .cover::after,
+body[data-theme="dark"] .chapter::after{
+  content: ""; position: absolute; bottom: 12%; left: 10%;
+  width: 180px; height: 180px;
+  background: radial-gradient(circle, rgba(212,165,116,0.2) 0%, transparent 70%);
+  border-radius: 50%; filter: blur(40px);
+  pointer-events: none; z-index: 0;
+}
+body[data-theme="dark"] .insight-body,
+body[data-theme="dark"] .big-quote .quote,
+body[data-theme="dark"] .big-number .v{
+  font-family: "Cormorant Garamond", "Noto Serif SC", serif !important;
+  font-style: italic !important;
+}
+body[data-theme="dark"] .insight-tag{
+  background: #d4a574 !important; color: #0f0f0f !important;
+}
+body[data-theme="dark"] .insight-source{ color: #9a9590 !important; }
+body[data-theme="dark"] .page-meta{
+  color: #c0bcb7 !important;
+  border-bottom-color: #2a2a2a !important;
+}
+body[data-theme="dark"] .page-meta .module{ color: #d4a574 !important; }
+body[data-theme="dark"] .card-num{ color: #d4a574 !important; }
+body[data-theme="dark"] .metric .v,
+body[data-theme="dark"] .metric .l{ color: #d4a574 !important; }
+body[data-theme="dark"] .bg-fbm{ display: none !important; }
+body[data-theme="dark"] .brand-bar{ background: #d4a574 !important; }
+
+/* 控件 UI 暗色化 */
+body[data-theme="dark"] .ctrl-btn{
+  background: #1f1f1f !important;
+  border-color: #2a2a2a !important;
+  color: #e8e4df !important;
+}
+body[data-theme="dark"] .ctrl-btn:hover{
+  background: #d4a574 !important;
+  color: #0f0f0f !important;
+  border-color: #d4a574 !important;
+}
+body[data-theme="dark"] .nav-arrows button{
+  background: #1f1f1f !important;
+  border-color: #2a2a2a !important;
+  color: #e8e4df !important;
+}
+body[data-theme="dark"] .page-num{
+  background: rgba(31,31,31,0.85) !important;
+  color: #d4a574 !important;
+}
+
+/* ============================================================
+   切换按钮 · 通用样式 + 当前激活状态显示
+   ============================================================ */
+#theme-toggle{
+  display: inline-flex; gap: 0.3rem; align-items: center;
+}
+#theme-toggle .opt-paper,
+#theme-toggle .opt-dark{
+  display: inline-block;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: opacity 0.2s, color 0.2s;
+}
+#theme-toggle .sep{
+  opacity: 0.3;
+  margin: 0 0.15rem;
+}
+/* paper 激活时 */
+body[data-theme="paper"] #theme-toggle .opt-paper{ opacity: 1; color: #c41e3a; }
+body[data-theme="paper"] #theme-toggle .opt-dark{ opacity: 0.4; }
+/* dark 激活时 */
+body[data-theme="dark"] #theme-toggle .opt-paper{ opacity: 0.4; }
+body[data-theme="dark"] #theme-toggle .opt-dark{ opacity: 1; color: #d4a574; }
+/* 无 data-theme(McKinsey 默认)时:两个都是中等不透明,提示用户可以切 */
+body:not([data-theme]) #theme-toggle .opt-paper,
+body:not([data-theme]) #theme-toggle .opt-dark{ opacity: 0.6; }
+</style>
+</head>
+<body class="theme-mckinsey">
+<!-- v4 新增 · FBM 纸感背景层(默认关闭,在 body 加 data-bg="fbm" 触发) -->
+<div class="bg-fbm" aria-hidden="true"></div>
+
+<div class="brand-bar"></div>
+<div class="progress-bar" id="progress" style="width: 0%"></div>
+
+<div class="ctrl-bar">
+  <button class="ctrl-btn" id="theme-toggle" title="切换 纸 / 墨 主题(快捷键 T)"><span class="opt-paper">纸</span><span class="sep">·</span><span class="opt-dark">墨</span></button>
+  <button class="ctrl-btn" id="overview-btn">概览 · O</button>
+  <button class="ctrl-btn" id="toc-btn">大纲 · M</button>
+</div>
+
+<div class="nav-arrows">
+  <button id="prev-btn" title="上一页 ←">‹</button>
+  <button id="next-btn" title="下一页 →">›</button>
+</div>
+<div class="page-num"><span id="cur">1</span> / <span id="tot">10</span></div>
+<div id="hint">
+  <span class="kbd">M</span> 大纲 · <span class="kbd">O</span> 概览 ·
+  <span class="kbd">F</span> 全屏 · <span class="kbd">←</span> <span class="kbd">→</span> 翻页 ·
+  <span class="kbd">⌘+/-</span> 缩放
+</div>
+
+<div id="toc-overlay">
+  <div id="toc-panel">
+    <div id="toc-header">
+      <h2>课程大纲 · 拖拽 ⋮⋮ 可重排顺序</h2>
+      <button id="toc-close">×</button>
+    </div>
+    <div id="toc-list"></div>
+    <div id="toc-footer">
+      <span id="toc-count">— 页</span>
+      <span>点击跳转 · 拖拽重排 · M / Esc 关闭</span>
+    </div>
+  </div>
+</div>
+
+<div id="overview">
+  <h2>所有页面 · 点击跳转</h2>
+  <div class="grid" id="overview-grid"></div>
+</div>
+
+<!-- ============================================================
+     幻灯片内容 · 10 页演示(含 2 个新版式)
+     ============================================================ -->
+<div class="stage" id="stage">
+
+  <!-- 1. 封面 -->
+  <section class="slide active" data-module="封面" data-name="课程封面">
+    <div class="cover">
+      <div class="eyebrow">AIGC TRAINING · RAOQIU · 2026</div>
+      <h1>AI 办公提效<br>实战训练营</h1>
+      <p class="lead">不讲概念,讲怎么用 — 半天学会 AI 帮你写汇报、做分析、出 PPT</p>
+      <div class="meta-grid">
+        <div class="meta-item">
+          <div class="label">主讲</div>
+          <div class="value">饶 秋</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">课程时长</div>
+          <div class="value">半天 · 3 小时</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">对象</div>
+          <div class="value">普通业务人员</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 课程概览 -->
+  <section class="slide" data-module="开场" data-name="今天解决什么">
+    <div class="page">
+      <div class="page-meta">
+        <span class="module">开场 · OPENING</span>
+        <span>02 / 10</span>
+      </div>
+      <h2 class="page-title">今天我们解决 4 件事</h2>
+      <p class="page-subtitle">不讲 AI 概念,讲你每天在做的事怎么做得更快</p>
+      <div class="page-body">
+        <div class="card-grid cols-2">
+          <div class="card bordered-top">
+            <div class="card-num">01</div>
+            <h3>和 AI 说话的方式</h3>
+            <p>把打字换成语音 — 一句话顶你打三行,这是今天最大的效率提升点。</p>
+          </div>
+          <div class="card bordered-top">
+            <div class="card-num">02</div>
+            <h3>TRAIN 提问链方法</h3>
+            <p>Target → Role → Ask → Integrate → Next。写文案、做分析、做汇报都套这个。</p>
+          </div>
+          <div class="card bordered-top">
+            <div class="card-num">03</div>
+            <h3>豆包 6 个核心功能</h3>
+            <p>帮我写作 / AI 图片 / AI PPT / 数据分析 / 深入研究 / 超能模式,每个都现场用起来。</p>
+          </div>
+          <div class="card bordered-top warm-mark">
+            <div class="card-num">04</div>
+            <h3>用在你每天的工作里</h3>
+            <p>朋友圈、种草、数据分析、经营汇报、客户跟进 — 一个一个落地。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 章节分隔页 1 -->
+  <section class="slide" data-module="模块一" data-name="章节1 · TRAIN 提问链">
+    <div class="chapter">
+      <div class="deco-num">01</div>
+      <div class="ch-label">Chapter One · 第一章</div>
+      <h1>TRAIN 提问链</h1>
+      <p class="desc">从一句话提问,到结构化对话 — 让 AI 真正听懂你想要什么</p>
+      <div class="ch-meta">
+        <span><strong>5</strong> 步方法</span>
+        <span><strong>45</strong> 分钟</span>
+        <span><strong>3</strong> 个实操案例</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 数据 + 对比 -->
+  <section class="slide" data-module="模块一" data-name="为什么需要 TRAIN">
+    <div class="page">
+      <div class="page-meta">
+        <span class="module">模块 1 · TRAIN 方法</span>
+        <span>04 / 10</span>
+      </div>
+      <h2 class="page-title">为什么大家用 AI 总是失望</h2>
+      <p class="page-subtitle">问题不在 AI,在我们提问的方式</p>
+      <div class="page-body">
+        <div class="metric-row">
+          <div class="metric">
+            <div class="v">87<span class="unit">%</span></div>
+            <div class="l">用户提问只有一句话</div>
+          </div>
+          <div class="metric">
+            <div class="v">3.2<span class="unit">×</span></div>
+            <div class="l">结构化提问效率提升</div>
+          </div>
+          <div class="metric">
+            <div class="v">5<span class="unit">步</span></div>
+            <div class="l">TRAIN 方法的全部步骤</div>
+          </div>
+        </div>
+        <div class="split">
+          <div class="col">
+            <h4>常见的提问方式</h4>
+            <ol class="list-clean">
+              <li>"帮我写个汇报"</li>
+              <li>"分析一下这个表格"</li>
+              <li>"做个 PPT"</li>
+              <li>"写个朋友圈"</li>
+            </ol>
+          </div>
+          <div class="col brand">
+            <h4>TRAIN 化的提问</h4>
+            <ol class="list-clean">
+              <li>明确目标 Target — 给谁看、多长、什么风格</li>
+              <li>设定角色 Role — 让 AI 扮演什么身份</li>
+              <li>清晰提问 Ask — 一次只问一件事</li>
+              <li>整合反馈 Integrate — 把改动合回提示词</li>
+              <li>规划下一步 Next — 这次完成,下一轮要什么</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ★ 新版式 - TRAIN 五步流程时间线 -->
+  <section class="slide" data-module="模块一" data-name="TRAIN 五步流程图">
+    <div class="page">
+      <div class="page-meta">
+        <span class="module">模块 1 · TRAIN 流程</span>
+        <span>05 / 11</span>
+      </div>
+      <h2 class="page-title">TRAIN 五步 · 完整流程</h2>
+      <p class="page-subtitle">每一步对应一个核心动作 — 顺序不能乱、不能跳</p>
+      <div class="page-body">
+        <div class="process-flow" style="--steps: 5">
+          <div class="step active">
+            <div class="step-num">STEP 01</div>
+            <div class="dot">T</div>
+            <h4>Target<br>明确目标</h4>
+            <p>给谁看 / 多长 / 什么风格 / 什么场景</p>
+          </div>
+          <div class="step">
+            <div class="step-num">STEP 02</div>
+            <div class="dot">R</div>
+            <h4>Role<br>设定角色</h4>
+            <p>让 AI 扮演什么身份 — 资深运营 / 行业分析师 / 文案专家</p>
+          </div>
+          <div class="step">
+            <div class="step-num">STEP 03</div>
+            <div class="dot">A</div>
+            <h4>Ask<br>清晰提问</h4>
+            <p>一次只问一件事 — 不要把 5 个需求塞在一句话里</p>
+          </div>
+          <div class="step">
+            <div class="step-num">STEP 04</div>
+            <div class="dot">I</div>
+            <h4>Integrate<br>整合反馈</h4>
+            <p>把改动合回提示词 — 让下一次直接出对的结果</p>
+          </div>
+          <div class="step">
+            <div class="step-num">STEP 05</div>
+            <div class="dot">N</div>
+            <h4>Next<br>规划下一步</h4>
+            <p>这一轮完成后 — 下一轮要什么、由谁来做</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. ★ 新版式 - 提示词代码块 -->
+  <section class="slide" data-module="模块一" data-name="提示词模板 · TRAIN">
+    <div class="page">
+      <div class="page-meta">
+        <span class="module">模块 1 · 提示词模板</span>
+        <span>05 / 10</span>
+      </div>
+      <h2 class="page-title">TRAIN 模板 · 直接复制使用</h2>
+      <p class="page-subtitle">把 <span class="hl-brand">[占位符]</span> 替换成你的具体内容,粘贴到豆包就能跑</p>
+      <div class="page-body">
+        <div class="prompt-block">
+          <span class="prompt-tag">PROMPT · TPL 01</span>
+你是<span class="ph">[资深行业角色]</span>,擅长<span class="ph">[具体能力]</span>。
+
+请帮我完成以下任务:
+T (Target) - 目标:<span class="ph">[给谁看 / 多长 / 什么风格]</span>
+R (Role)   - 角色:<span class="ph">[AI 扮演什么身份]</span>
+A (Ask)    - 任务:<span class="ph">[一次只问一件事]</span>
+I (Input)  - 资料:<span class="ph">[贴入参考材料]</span>
+N (Next)   - 下一步:<span class="ph">[这一轮完成后下一轮要什么]</span>
+
+输出要求:
+1. <span class="ph">[结构]</span>
+2. <span class="ph">[长度]</span>
+3. <span class="ph">[语气]</span>
+        </div>
+        <div class="prompt-meta">
+          <span><strong>适用场景</strong>写汇报 / 做分析 / 出 PPT 大纲 / 朋友圈文案</span>
+          <span><strong>预计耗时</strong>2 分钟填空 + 30 秒等待</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. ★ 新版式 - 学员任务卡 -->
+  <section class="slide" data-module="模块一" data-name="实操任务 · 任务1">
+    <div class="page">
+      <div class="page-meta">
+        <span class="module">模块 1 · 实操任务</span>
+        <span>06 / 10</span>
+      </div>
+      <h2 class="page-title">任务 1 · 用 TRAIN 写一份周报</h2>
+      <p class="page-subtitle">现场动手 10 分钟 — 完成后我们对照标准点评</p>
+      <div class="page-body">
+        <div class="task-card">
+          <div class="left">
+            <div class="task-card-header">
+              <span class="num">01</span>
+              <span class="name">用 TRAIN 提问链写本周工作周报<small>Task · 10 minutes · Hands-on</small></span>
+            </div>
+            <div class="task-block">
+              <h5>任务背景</h5>
+              <p>你下班前要给主管交一份本周周报,主管时间紧、希望一眼看到结论和下周计划。</p>
+            </div>
+            <div class="task-block">
+              <h5>你的任务</h5>
+              <ol>
+                <li>用 TRAIN 模板写出完整提示词</li>
+                <li>粘贴进豆包,生成第一版周报</li>
+                <li>用一次追问把它改到能交</li>
+              </ol>
+            </div>
+          </div>
+          <div class="right">
+            <div class="task-block">
+              <h5>验收标准</h5>
+              <ol>
+                <li>第一句话就是结论,不超过 30 字</li>
+                <li>有具体数字,不是"基本完成"</li>
+                <li>下周计划有 3 件事,每件附负责人</li>
+              </ol>
+            </div>
+            <div class="task-block">
+              <h5>配套资料</h5>
+              <p>附件 1 · 本周工作流水<br>附件 2 · 上周周报范例</p>
+            </div>
+            <div class="timer">10:00<small>动手时间 · Hands-on</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Key Insight 关键洞察(替代原金句页) -->
+  <section class="slide" data-module="模块一" data-name="关键洞察 · AI 与人">
+    <div class="insight-page">
+      <div class="insight-tag">Key Insight · 关键洞察</div>
+      <div class="insight-body">
+        <p>AI 不会淘汰你 —— 但<span class="hl-brand">会用 AI 的人</span>,会用更短的时间,做出更有判断力的工作。</p>
+      </div>
+      <div class="insight-meta">
+        <div class="item">效率倍数<strong>3.2×</strong></div>
+        <div class="item">学员反馈<strong>92% 推荐</strong></div>
+        <div class="item">课后落地率<strong>4 / 5</strong></div>
+      </div>
+      <div class="insight-source">饶秋老师 AIGC 训练营 · 2024–2026 累计 80 场学员调研</div>
+    </div>
+  </section>
+
+  <!-- 8. 章节分隔页 2 -->
+  <section class="slide" data-module="模块二" data-name="章节2 · 实战工具">
+    <div class="chapter">
+      <div class="deco-num">02</div>
+      <div class="ch-label">Chapter Two · 第二章</div>
+      <h1>豆包实战六件套</h1>
+      <p class="desc">从写朋友圈到出经营汇报 PPT — 把每一个功能落到一个真实任务上</p>
+      <div class="ch-meta">
+        <span><strong>6</strong> 个功能</span>
+        <span><strong>6</strong> 个真实任务</span>
+        <span><strong>90</strong> 分钟</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. 6 个功能 - 修复排版(page-body 居中) -->
+  <section class="slide" data-module="模块二" data-name="豆包六件套总览">
+    <div class="page">
+      <div class="page-meta">
+        <span class="module">模块 2 · 豆包六件套</span>
+        <span>09 / 10</span>
+      </div>
+      <h2 class="page-title">六个功能,六个真实任务</h2>
+      <p class="page-subtitle">下面每一格,都对应你工作里的一件具体事</p>
+      <div class="page-body">
+        <div class="card-grid cols-3">
+          <div class="card mini dark">
+            <div class="card-num">01 · 帮我写作</div>
+            <h3>朋友圈文案</h3>
+            <p>语音说要求 → 30 秒出 3 版,选一版改改就发。</p>
+          </div>
+          <div class="card mini dark">
+            <div class="card-num">02 · AI 图片</div>
+            <h3>种草配图</h3>
+            <p>不会拍?用提示词生成,直接对应文案场景。</p>
+          </div>
+          <div class="card mini dark">
+            <div class="card-num">03 · AI PPT</div>
+            <h3>会议汇报</h3>
+            <p>大纲粘进去,5 分钟出整套,导出 PDF 直接用。</p>
+          </div>
+          <div class="card mini bordered-top">
+            <div class="card-num">04 · 数据分析</div>
+            <h3>表格读懂</h3>
+            <p>Excel 拖进豆包,问"哪几个区域有问题",直接给答案。</p>
+          </div>
+          <div class="card mini bordered-top">
+            <div class="card-num">05 · 深入研究</div>
+            <h3>行业资料</h3>
+            <p>调研报告原本要查一天,现在 5 分钟出框架。</p>
+          </div>
+          <div class="card mini bordered-top warm-mark">
+            <div class="card-num">06 · 超能模式</div>
+            <h3>3 分钟经营汇报</h3>
+            <p>从数据 → 结论 → PPT → 讲稿,一条命令打通。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ★ 新版式 - AI 应用 2x2 战略矩阵 -->
+  <section class="slide" data-module="模块二" data-name="AI 应用战略矩阵">
+    <div class="page">
+      <div class="page-meta">
+        <span class="module">模块 2 · 战略矩阵</span>
+        <span>11 / 12</span>
+      </div>
+      <h2 class="page-title">AI 工具应用矩阵 · 先做哪些</h2>
+      <p class="page-subtitle">用一张图判断:你的工作里哪些任务最该用 AI 替代</p>
+      <div class="page-body">
+        <div class="matrix-2x2">
+          <div class="y-axis">
+            <span class="y-tip-top">高</span>
+            <span class="y-label">替代效果</span>
+            <span class="y-tip-bottom">低</span>
+          </div>
+          <div class="quadrant highlight">
+            <span class="q-tag">象限 I · 优先做</span>
+            <h4>高频 + 强替代</h4>
+            <p>朋友圈文案、周报、会议纪要、邮件草稿 — 这些先全部交给 AI</p>
+          </div>
+          <div class="quadrant">
+            <span class="q-tag">象限 II · 选择做</span>
+            <h4>低频 + 强替代</h4>
+            <p>年度规划、深度调研、行业报告 — 偶尔来一次,AI 能帮上大忙</p>
+          </div>
+          <div class="quadrant">
+            <span class="q-tag">象限 III · 别勉强</span>
+            <h4>低频 + 弱替代</h4>
+            <p>需要现场判断、面对面沟通的任务 — AI 帮不了多少,别为难自己</p>
+          </div>
+          <div class="quadrant">
+            <span class="q-tag">象限 IV · 工具化</span>
+            <h4>高频 + 弱替代</h4>
+            <p>客户回复、数据录入 — AI 做模板和草稿,你来做最后一道判断</p>
+          </div>
+          <div class="x-axis">
+            <span class="x-tip-left">低</span>
+            <span class="x-label">使用频率</span>
+            <span class="x-tip-right">高</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. Big Number 范例 (v4 新增) -->
+  <section class="slide" data-module="收束" data-name="Big Number 范例">
+    <div class="big-number">
+      <span class="kicker">THE GAP · 真实差距</span>
+      <div class="v serif-quote">60%</div>
+      <p class="lead">员工每周用 AI 不到 1 次,管理层以为是 80%。</p>
+      <span class="source">SOURCE / 客户内部调研 · 2026.03</span>
+    </div>
+  </section>
+
+  <!-- 12. Big Quote 范例 (v4 新增) -->
+  <section class="slide" data-module="收束" data-name="Big Quote 范例">
+    <div class="big-quote">
+      <span class="kicker">TAKEAWAY · 我的判断</span>
+      <blockquote class="quote serif-quote">
+        AI 不会取代你,<br>
+        但用 AI 的人会。
+      </blockquote>
+      <span class="attribution">— 饶秋 · AIGC 培训交付现场</span>
+    </div>
+  </section>
+
+  <!-- 10. 结尾 -->
+  <section class="slide" data-module="结尾" data-name="结尾致谢">
+    <div class="ending">
+      <div class="deco-num">03</div>
+      <div class="eyebrow">从今天开始 · Continue From Today</div>
+      <h1>从一个小任务<br>开始用起来</h1>
+      <p class="lead">回去找出你每周必做的 1 件重复劳动 — 让 AI 替你做掉它。明天就开始,不要等。</p>
+      <div class="signature">
+        <div>
+          <div class="label">主讲</div>
+          <div class="value">饶 秋</div>
+        </div>
+        <div>
+          <div class="label">联系</div>
+          <div class="value">课后扫码加微信</div>
+        </div>
+        <div>
+          <div class="label">课程编号</div>
+          <div class="value">RQ-AIGC-2026-04</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============================================================
+     v5.1 双主题切换 · 纸 / 墨
+     - 默认行为:body 无 data-theme → McKinsey 蓝(向后兼容)
+     - <body data-theme="paper"> → Paper & Ink 纸墨白
+     - <body data-theme="dark">  → Dark Botanical 暗色
+     - 点击右上角"纸 · 墨"按钮 或 按 T 键切换 paper ↔ dark
+     - localStorage 记忆,刷新延续
+     ============================================================ -->
+<script>
+(function() {
+  // 加载时:从 localStorage 恢复主题(如果之前选过)
+  var saved = localStorage.getItem('raoqiu-deck-theme');
+  if (saved === 'dark' || saved === 'paper') {
+    document.body.dataset.theme = saved;
+  }
+
+  function applyToggle() {
+    var btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+      var current = document.body.dataset.theme || 'paper';
+      var next = current === 'dark' ? 'paper' : 'dark';
+      document.body.dataset.theme = next;
+      localStorage.setItem('raoqiu-deck-theme', next);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyToggle);
+  } else {
+    applyToggle();
+  }
+
+  // 键盘快捷键 T 切换主题
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 't' && e.key !== 'T') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;  // 不拦截 Cmd+T 新标签等
+    var btn = document.getElementById('theme-toggle');
+    if (btn) btn.click();
+  });
+})();
+</script>
+
+<script>
+class Slideshow {
+  constructor(){
+    this.slides = [].slice.call(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.curEl = document.getElementById('cur');
+    this.totEl = document.getElementById('tot');
+    this.prog = document.getElementById('progress');
+    this.totEl.textContent = this.slides.length;
+
+    document.getElementById('prev-btn').addEventListener('click', ()=>this.prev());
+    document.getElementById('next-btn').addEventListener('click', ()=>this.next());
+
+    this.bindKeys(); this.bindHash(); this.bindTouch();
+    this.show(this.parseHash() || 0);
+  }
+  show(idx){
+    if (idx < 0 || idx >= this.slides.length) return;
+    var dir = idx < this.current ? 'prev' : 'next';
+    this.slides.forEach(s => s.classList.remove('active','from-prev'));
+    if (dir === 'prev') this.slides[idx].classList.add('from-prev');
+    this.slides[idx].classList.add('active');
+    this.slides[idx].scrollTop = 0;
+    this.current = idx;
+    this.curEl.textContent = idx + 1;
+    this.prog.style.width = ((idx+1)/this.slides.length*100) + '%';
+    location.hash = 's-' + (idx+1);
+  }
+  next(){ this.show(Math.min(this.current+1, this.slides.length-1)); }
+  prev(){ this.show(Math.max(this.current-1, 0)); }
+  first(){ this.show(0); }
+  last(){ this.show(this.slides.length-1); }
+  parseHash(){
+    var m = location.hash.match(/^#s-(\d+)$/);
+    return m ? Math.max(0, Math.min(parseInt(m[1])-1, this.slides.length-1)) : 0;
+  }
+  bindHash(){
+    window.addEventListener('hashchange', ()=>{
+      var idx = this.parseHash();
+      if (idx !== this.current) this.show(idx);
+    });
+  }
+  bindKeys(){
+    document.addEventListener('keydown', e=>{
+      var t = e.target.tagName;
+      if (t === 'INPUT' || t === 'TEXTAREA') return;
+      if (e.metaKey || e.ctrlKey) return;
+      var k = e.key;
+      if (k === 'ArrowRight' || k === 'PageDown' || k === ' '){ e.preventDefault(); this.next(); }
+      else if (k === 'ArrowLeft' || k === 'PageUp'){ e.preventDefault(); this.prev(); }
+      else if (k === 'ArrowDown'){ e.preventDefault(); this.next(); }
+      else if (k === 'ArrowUp'){ e.preventDefault(); this.prev(); }
+      else if (k === 'Home'){ e.preventDefault(); this.first(); }
+      else if (k === 'End'){ e.preventDefault(); this.last(); }
+      else if (k === 'f' || k === 'F'){ e.preventDefault(); toggleFullscreen(); }
+      else if (k === 'm' || k === 'M'){ e.preventDefault(); toggleTOC(); }
+      else if (k === 'o' || k === 'O'){ e.preventDefault(); toggleOverview(); }
+      else if (k === 'Escape'){
+        if (overlayActive('toc-overlay')) toggleTOC();
+        else if (overlayActive('overview')) toggleOverview();
+        else if (document.fullscreenElement) document.exitFullscreen();
+      }
+    });
+  }
+  bindTouch(){
+    var sx = 0;
+    document.addEventListener('touchstart', e=>{ sx = e.touches[0].clientX; }, {passive:true});
+    document.addEventListener('touchend', e=>{
+      var dx = sx - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 50) dx > 0 ? this.next() : this.prev();
+    }, {passive:true});
+  }
+}
+
+function toggleFullscreen(){
+  var el = document.documentElement;
+  var inFs = document.fullscreenElement || document.webkitFullscreenElement;
+  if (!inFs){
+    (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+  } else {
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  }
+}
+function overlayActive(id){
+  return document.getElementById(id).classList.contains('active');
+}
+
+/* TOC */
+var slideshow;
+
+function renderTOC(){
+  var listEl = document.getElementById('toc-list');
+  var countEl = document.getElementById('toc-count');
+  listEl.innerHTML = '';
+  var sections = document.querySelectorAll('#stage > .slide');
+  countEl.textContent = sections.length + ' 页';
+  sections.forEach((sec, idx)=>{
+    var mod = sec.getAttribute('data-module') || '未分组';
+    var name = sec.getAttribute('data-name')
+            || (sec.querySelector('h1, h2') && sec.querySelector('h1, h2').textContent.trim().substring(0,24))
+            || ('第 ' + (idx+1) + ' 页');
+    var item = document.createElement('div');
+    item.className = 'toc-item';
+    item.setAttribute('draggable', 'true');
+    item.setAttribute('data-idx', idx);
+    item.innerHTML =
+      '<span class="grip">⋮⋮</span>' +
+      '<span class="num">' + String(idx+1).padStart(2,'0') + '</span>' +
+      '<span class="label"><span class="module">' + mod + '</span><span class="name">' + name + '</span></span>' +
+      '<span class="jump">↵</span>';
+    item.addEventListener('click', ()=>{
+      slideshow.show(parseInt(item.getAttribute('data-idx'),10));
+      toggleTOC();
+    });
+    bindDrag(item);
+    listEl.appendChild(item);
+  });
+}
+
+var dragSrc = null;
+function bindDrag(item){
+  var listEl = document.getElementById('toc-list');
+  item.addEventListener('dragstart', e=>{
+    dragSrc = item;
+    item.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', item.getAttribute('data-idx')); } catch(_){}
+  });
+  item.addEventListener('dragend', ()=>{
+    item.classList.remove('dragging');
+    [].forEach.call(listEl.querySelectorAll('.drag-over'), el => el.classList.remove('drag-over'));
+    dragSrc = null;
+  });
+  item.addEventListener('dragover', e=>{
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    [].forEach.call(listEl.querySelectorAll('.drag-over'), el => el.classList.remove('drag-over'));
+    item.classList.add('drag-over');
+  });
+  item.addEventListener('dragleave', ()=> item.classList.remove('drag-over'));
+  item.addEventListener('drop', e=>{
+    e.preventDefault(); e.stopPropagation();
+    if (!dragSrc || dragSrc === item) return;
+    var srcIdx = parseInt(dragSrc.getAttribute('data-idx'), 10);
+    var dstIdx = parseInt(item.getAttribute('data-idx'), 10);
+    var stage = document.getElementById('stage');
+    var sections = [].slice.call(stage.querySelectorAll(':scope > .slide'));
+    var moving = sections[srcIdx];
+    if (srcIdx < dstIdx){
+      stage.insertBefore(moving, sections[dstIdx].nextSibling);
+    } else {
+      stage.insertBefore(moving, sections[dstIdx]);
+    }
+    slideshow.slides = [].slice.call(document.querySelectorAll('.slide'));
+    var newIdx = slideshow.slides.indexOf(moving);
+    slideshow.current = -1;
+    slideshow.show(newIdx >= 0 ? newIdx : 0);
+    renderTOC();
+    renderOverview();
+  });
+}
+function toggleTOC(){
+  var ov = document.getElementById('toc-overlay');
+  var willShow = !ov.classList.contains('active');
+  ov.classList.toggle('active');
+  if (willShow) renderTOC();
+}
+(function(){
+  document.getElementById('toc-btn').addEventListener('click', toggleTOC);
+  document.getElementById('toc-close').addEventListener('click', toggleTOC);
+  document.getElementById('toc-overlay').addEventListener('click', e=>{
+    if (e.target.id === 'toc-overlay') toggleTOC();
+  });
+})();
+
+function renderOverview(){
+  var grid = document.getElementById('overview-grid');
+  grid.innerHTML = '';
+  var sections = document.querySelectorAll('#stage > .slide');
+  sections.forEach((sec, idx)=>{
+    var mod = sec.getAttribute('data-module') || '';
+    var name = sec.getAttribute('data-name') || ('第 ' + (idx+1) + ' 页');
+    var t = document.createElement('div');
+    t.className = 'thumb';
+    t.innerHTML =
+      '<span class="thumb-num">' + String(idx+1).padStart(2,'0') + '</span>' +
+      '<span class="thumb-mod">' + mod + '</span>' +
+      '<div class="thumb-name">' + name + '</div>';
+    t.addEventListener('click', ()=>{
+      slideshow.show(idx);
+      toggleOverview();
+    });
+    grid.appendChild(t);
+  });
+}
+function toggleOverview(){
+  var ov = document.getElementById('overview');
+  var willShow = !ov.classList.contains('active');
+  ov.classList.toggle('active');
+  if (willShow) renderOverview();
+}
+document.getElementById('overview-btn').addEventListener('click', toggleOverview);
+
+(function(){
+  var hint = document.getElementById('hint');
+  hint.classList.add('show');
+  setTimeout(()=>hint.classList.remove('show'), 6000);
+})();
+
+slideshow = new Slideshow();
+</script>
+</body>
+</html>
