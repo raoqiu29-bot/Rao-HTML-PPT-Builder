@@ -1,8 +1,22 @@
 # Rao-HTML-to-PPT
 
-> 一个为 **Claude Code / Claude Cowork** 设计的 HTML PPT 生成 skill。基于麦肯锡咨询视觉语言 + 全套工程纪律,**12 种版式 + 双主题切换 + 自检脚本**。专为企业培训、客户提案、思想分享等场景设计。
+> 一个为 **Claude Code / Claude Cowork** 设计的 HTML PPT 生成 skill。基于麦肯锡咨询视觉语言 + 全套工程纪律,**12 种版式 + 双主题切换 + SVG 数据 Dashboard + spec_lock 防漂移 + Quality Gate 硬门控**。专为企业培训、客户提案、思想分享等场景设计。
 
-[![Skill Version](https://img.shields.io/badge/version-v5.1-blue)]() [![License](https://img.shields.io/badge/license-MIT-green)]() [![Claude Skill](https://img.shields.io/badge/Claude-Skill-orange)]()
+[![Skill Version](https://img.shields.io/badge/version-v5.6-blue)]() [![License](https://img.shields.io/badge/license-MIT-green)]() [![Claude Skill](https://img.shields.io/badge/Claude-Skill-orange)]()
+
+## ⚠️ 何时用本技能 vs 何时用 PPT Master(v5.6 新增 · 诚实优先)
+
+| 场景 | 推荐工具 |
+|---|---|
+| 🍎 现场演讲投影 / 培训交付 | ✅ **本技能**(HTML 最适合) |
+| ✏️ 客户拿到后**想点开改某一行字** | ✅ **[hugohe3/ppt-master](https://github.com/hugohe3/ppt-master)**(native DrawingML,真可编辑) |
+| 学员想拿回去改成自己的版本 | ✅ **PPT Master** |
+| 莱美客户经理要换 logo / 加客户名 | ✅ **PPT Master** |
+| PDF/DOCX/URL 直接转 PPT 不想自己挑骨架 | ✅ **PPT Master**(他们有 source_to_md 工具集 6 个脚本) |
+| 需要 PPTX 内嵌真 OOXML 入场动画 + 转场 | ✅ **PPT Master** |
+| 需要带旁白视频导出 / 用克隆声音念 PPT | ✅ **PPT Master** |
+
+**两个工具互补,不是替代。** 最佳工作流:**现场用本技能 HTML 演讲 + 同一份内容用 PPT Master 出可编辑 PPTX 给客户带走**。本技能 PPTX 导出是**图片版**(每页一张大图,不可二次编辑),诚实说明。详见 `SKILL.md` "⚠️ 边界声明"段。
 
 ---
 

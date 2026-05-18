@@ -3,7 +3,7 @@ name: Rao-HTML-to-PPT
 zh_name: "饶秋老师 HTML PPT 标准生成器"
 en_name: "Rao HTML to PPT"
 emoji: "🎯"
-description: 基于饶秋老师 McKinsey 风 HTML PPT 标准模板(v5.5),生成结构清晰、克制专业、带麦肯锡咨询气质的培训课件、汇报演讲、提案材料。**支持三种模式**:Mode A 新建一份 PPT / Mode B 把 Markdown 大纲转成 PPT / Mode C 改/优化/扩展已有 HTML PPT。当用户要求"做 PPT""做培训课件""做汇报""做客户提案""把大纲变成 PPT""改一下这页""加一页讲 XX""更新这份课件的数据""按我的风格做"时,必须使用此技能。也支持 PDF 导出、PPTX 导出和一键自检脚本。包括但不限于:Cowork 中上传课程大纲生成 HTML PPT / 给老课件改局部 / 客户提案 / AIGC 培训交付。即使用户没明说"麦肯锡风",只要场景是企业培训 / 咨询汇报 / 商业提案 / 个人分享 / 演讲材料,都应触发。配套:Brand Style 卡片自动加载(客户色 + 字体 + Tone + 合规约束一张表)、Ghost Deck Test 标题串读自检、Citation 强制(借用数据必有来源)、双主题切换(纸/墨 v5.1)、Inline Editing(浏览器内 E 键编辑 v5.2)、培训片五段循环大纲模板(v5.5)、SVG 数据 Dashboard 版式库(donut/gauge/sparkline/metric card/line chart · v5.5)、SVG icon 库(24 个基础图标统一规范 · v5.5)、Anti AI-slop 反清单(v5.5)、CSS Gotchas 踩坑警示档(v5.5)、scripts/ 提供 PDF 和 PPTX 导出 + 合规自检。
+description: 基于饶秋老师 McKinsey 风 HTML PPT 标准模板(v5.6),生成结构清晰、克制专业、带麦肯锡咨询气质的培训课件、汇报演讲、提案材料。**支持三种模式**:Mode A 新建一份 PPT / Mode B 把 Markdown 大纲转成 PPT / Mode C 改/优化/扩展已有 HTML PPT。当用户要求"做 PPT""做培训课件""做汇报""做客户提案""把大纲变成 PPT""改一下这页""加一页讲 XX""更新这份课件的数据""按我的风格做"时,必须使用此技能。也支持 PDF 导出、PPTX 导出和一键自检脚本。包括但不限于:Cowork 中上传课程大纲生成 HTML PPT / 给老课件改局部 / 客户提案 / AIGC 培训交付。即使用户没明说"麦肯锡风",只要场景是企业培训 / 咨询汇报 / 商业提案 / 个人分享 / 演讲材料,都应触发。**边界声明(v5.6)**:本技能产出的 PPTX 是图片版(不可二次编辑);如需原生可编辑 PPTX 让客户/学员带回去改,推荐用 hugohe3/ppt-master 配合。配套:Brand Style 卡片自动加载、Ghost Deck Test 标题串读自检、Citation 强制(借用数据必有来源)、双主题切换(纸/墨 v5.1)、Inline Editing(浏览器内 E 键编辑 v5.2)、培训片五段循环大纲模板(v5.5)、SVG 数据 Dashboard 版式库(v5.5)、SVG icon 库 24 个基础图标(v5.5)、Anti AI-slop 反清单(v5.5)、CSS Gotchas 踩坑警示档(v5.5)、**spec_lock 长 deck 防漂移机制(v5.6 · 每页重读)**、**Quality Gate 导出前硬门控(v5.6 · raoqiu-check --strict)**、**多渠道输入工具表 PDF/DOCX/Excel/URL/PPTX→Markdown(v5.6)**、**examples/ 真实成片示范库(v5.6)**、scripts/ 提供 PDF 和 PPTX 导出 + 合规自检。
 category: slides
 scenario: training-presentation
 surface: ["keynote-live", "pdf-archive", "pptx-editable", "html-share", "wechat-article"]
@@ -11,8 +11,8 @@ design_system: mckinsey-paper-dark
 aspect_hint: "16:9"
 modes: ["A-new", "B-outline-to-deck", "C-enhance-existing"]
 themes: ["mckinsey-blue", "paper-ink", "dark-botanical"]
-version: "5.5.0"
-tags: ["training", "presentation", "mckinsey", "paper-ink", "dark-botanical", "chinese", "consulting", "html-slides", "wysiwyg-edit", "svg-charts", "dashboard", "training-cycle", "anti-ai-slop"]
+version: "5.6.0"
+tags: ["training", "presentation", "mckinsey", "paper-ink", "dark-botanical", "chinese", "consulting", "html-slides", "wysiwyg-edit", "svg-charts", "dashboard", "training-cycle", "anti-ai-slop", "spec-lock", "quality-gate", "multi-input"]
 repo: "https://github.com/raoqiu29-bot/Rao-HTML-to-PPT"
 license: MIT
 ---
@@ -65,6 +65,39 @@ license: MIT
 - 用户提"公众号""转文章""发推文" → **wechat-article**(转给 md2wechat skill)
 
 **为什么这一步重要**:同样内容,**演示用 PPT 需要双主题 + 动效 + 编辑能力**,**PDF 归档需要静态稳重 + 打印友好**,**链接分享需要文件小 + 字体 CDN 优化**。先确认 surface 才能给对的输出。
+
+### ⚠️ 边界声明 · 何时用本技能 vs 何时用 PPT Master(v5.6 新增 · 诚实优先)
+
+**本技能(Rao-HTML-to-PPT)的强项**:
+- 🍎 HTML 现场演讲(键盘翻页 / 全屏 / 大纲面板 / 触屏 / Inline E 键编辑)
+- 🎯 McKinsey 风深度锁死(单一风格,不稀释辨识度)
+- 📚 培训片五段循环大纲 + 时长表(4 小时 = 100-140 张这种基准)
+- 🎨 双主题切换 / SVG 数据 Dashboard / 24 个 SVG icon 统一规范
+- 📄 PDF 导出(图片版),📊 PPTX 导出(**图片版,不可二次编辑**)
+
+**本技能的边界**(实事求是说):
+- ❌ **导出的 PPTX 是图片版**——每页一张大图塞进 PowerPoint,客户拿到后**不能改文字、不能换图表数据、不能挪元素**
+- ❌ 不支持 PDF/DOCX/URL 直接转 PPT(Mode B 输入靠 markdown,转换走 `references/source-input.md` 的工具表)
+- ❌ 不做 TTS 旁白 / 视频导出 / 声音克隆
+
+**何时去用 [hugohe3/ppt-master](https://github.com/hugohe3/ppt-master)(17.8k stars)**:
+
+| 场景 | 推荐工具 |
+|---|---|
+| 现场演讲投影 / 培训交付 | ✅ **本技能**(HTML 最适合) |
+| 客户拿到后**想点开改某一行字** | ✅ **PPT Master**(native DrawingML,真可编辑) |
+| 学员拿到后**想改成自己的版本** | ✅ **PPT Master** |
+| 莱美客户经理**要换 logo / 加客户名** | ✅ **PPT Master** |
+| 客户提案**对方要插入自家数据** | ✅ **PPT Master** |
+| PDF/DOCX/URL 直接转 PPT(不想自己挑骨架) | ✅ **PPT Master**(他们 source_to_md 工具集 6 个脚本封装好了) |
+| 需要 PPTX 内嵌真 OOXML 入场动画 + 转场 | ✅ **PPT Master** |
+| 需要带旁白的视频导出 / 用克隆声音念 PPT | ✅ **PPT Master** |
+
+**两个工具是互补关系,不是替代关系**。最佳工作流:
+- **现场用本技能 HTML 演讲**(键盘翻页 / 双主题 / 大纲拖拽)
+- **同一份内容用 PPT Master 出一份可编辑 PPTX 给客户/学员带走**(他们可以在 PowerPoint 里继续改)
+
+PPT Master 本地副本在 `/Users/raoyuli/Desktop/Skills/02-参考资料-References/演示工具-PresentationTools/他山之石-OtherSlideSkills/ppt-master/`。
 
 **借鉴源**:[nexu-io/html-anything](https://github.com/nexu-io/html-anything) 的"9 个 output surface"概念(2.6k stars)— 让用户明确目标平台,skill 自动适配输出规则。
 
@@ -149,6 +182,23 @@ bash scripts/raoqiu-check.sh <改后的文件>
 要求 P0 全过,才能交付。
 
 ---
+
+### Step 0.5 · 看 examples/ 示范片(v5.6 新增 · 借鉴 ppt-master examples/)
+
+**做什么**:开始 Step 1 之前,先 `ls examples/<scenario>/` 看对应场景子目录有没有真实示范片。
+
+| 用户场景 | 看哪个子目录 |
+|---|---|
+| 培训片 / 课件 / 培训交付 | `examples/training/` |
+| 客户提案 / 销售演示 | `examples/client-proposal/` |
+| 莱美对外文档 | `examples/laimei/` |
+| 自媒体单页 / 小红书图集 | `examples/xhs-or-self-media/` |
+
+**有示范片就**:`Read` 一份(选最近期的或最像当前任务的),学它的版式选择 / 节奏 / 留白 / 标题写作风格,**这比读抽象规则有效得多**。
+
+**没有示范片就**:跳过,按默认流程走。**不要因为目录空导致流程卡住**——examples 是辅助,不是前置。
+
+详细规则 + 脱敏要求见 `examples/README.md`。
 
 ### Step 1 · 需求澄清(动手前必做,绝不跳过)
 
@@ -245,6 +295,33 @@ TAKEAWAY    (收束)         → 1-2 页:Key Insight + ending
 
 大纲建议保存为 `大纲-v1.md`,便于迭代。
 
+### Step 1.6 · 锁 spec_lock(v5.6 新增 · 借鉴 ppt-master 防漂移机制)
+
+**触发条件**(任一命中就做):
+- 培训片 ≥ 20 页
+- 客户提案 ≥ 12 页
+- Mode B(把外部大纲转 deck)
+- Mode C 加 ≥ 5 页
+
+**做什么**:在对话里输出一份 **spec_lock**(机器可读的"动笔前最后一次确认设计参数")。
+完整模板:`references/spec-lock-template.md`。
+
+**核心 12 个字段**(简版,完整版见模板):
+- `colors`(c_brand / c_warm / c_ink_2 / c_ink_3 / c_line + 5 个 dashboard 语义色)
+- `fonts`(中英无衬线 + mono + 衬线只用 5 处)
+- `client_override`(客户色是否覆盖 c_warm,登记 hex 和理由)
+- `pii_safety`(健康数据 / 莱美内部 / 学员真名 三个红线)
+- `data_sources`(凡用了外部数据,在这里登记 source,Citation 强制)
+- `rhythm`(章节扉页 ≤ 5 / Insight ≤ 3 / Big Number ≤ 3 / Big Quote ≤ 2)
+- `layouts_used`(hero / info / dashboard 各用了哪些版式)
+
+**生成时纪律**:
+- 写每一页前**重读一次 spec_lock**,所有颜色 / 字体 / 客户名 / 数据 hex 必须从 spec_lock 取
+- **不许凭记忆**——长 deck 下记忆会漂移,v4 时代我们撞过(深蓝 `#051C2C` 从第 7 张悄悄滑到 `#0A2540`)
+- 一旦发现漂移,**立即停手再修**,不要"继续写完再统一替换"
+
+**这条为什么很值得**:PPT Master(hugohe3)17.8k stars 的核心机制就是"SPEC_LOCK RE-READ PER PAGE",写在 SKILL.md 第 28 条规则,跟红线一样。我们撞过同样的坑,这次把方法补回来。
+
 ### Step 1.7 · 页面节奏规划(动手写 HTML 前必做)
 
 光有大纲不够,**还要画一张"页面节奏表"** — 每一页明确写下:页码 / 版式名 / 是否重音页 / 主题色调。
@@ -315,13 +392,33 @@ TAKEAWAY    (收束)         → 1-2 页:Key Insight + ending
 - 对照 `references/design-system.md` 看配色、字体、留白规范
 - 衬线字体的边界规则在 `design-system.md` "字体分工" 一节 — **只在重音版式可用衬线**
 
-### Step 4 · 自检(走 checklist.md)
+### Step 4 · 自检 + Quality Gate 硬门控(v5.6 升级 · 借鉴 ppt-master)
 
-生成完不要直接交付。打开 `references/checklist.md` 走一遍:
+生成完不要直接交付。
+
+**4.1 走 checklist.md 人工对照**:
 - 第一次做的人:从头到尾读
 - 老手:跳到文末"最终自检清单"勾选
 
-P0 级别的问题(衬线滥用 / AI 风颜色 / 卡片密度超限 / 客户色覆盖错位)**必须全部通过**才算合格。
+**4.2 跑脚本严格门控**(v5.6 强制):
+```bash
+bash scripts/raoqiu-check.sh --strict <file.html>
+```
+- ✅ `GATE PASSED` → 允许导出 / 交付
+- ⛔ `GATE FAILED` → **禁止导出**,修完 P0 再重跑
+
+**4.3 导出前再跑一次**(`export-pdf.sh` / `export-pptx.sh` 已经内置门控,自动跑一遍 `--strict`,FAIL 不导出):
+```bash
+bash scripts/export-pdf.sh <file.html>      # 内置 gate,FAIL 不导
+bash scripts/export-pptx.sh <file.html>     # 内置 gate,FAIL 不导
+```
+
+**4.4 spec_lock 抽查**(如果 Step 1.6 锁了 spec_lock):
+- 任挑 3 张片,搜 hex 颜色是否全在 `spec_lock.colors.*` 里
+- 任挑 1 张数据页,数字是否登记在 `spec_lock.data_sources`
+- 任挑 1 张衬线标题,是不是在 `serif_allowed_in` 5 处之一
+
+**为什么要硬门控**:之前 P0 是"建议必跑",AI 急着交付时会跳。v5.6 改成"导出脚本强制先跑,FAIL 不导出"——绕不过去。紧急情况可以加 `--skip-gate` 跳过,但责任自负。借鉴 PPT Master 的 Quality Gate 思想:`error must be fixed before proceeding`。
 
 ### Step 5 · 输出
 

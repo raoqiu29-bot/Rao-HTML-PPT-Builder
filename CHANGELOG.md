@@ -8,6 +8,126 @@
 
 ---
 
+## v5.6.0 · 2026-05-18(借鉴 hugohe3/ppt-master 18k stars · 方案 C)
+
+**主线**:饶秋发现 [hugohe3/ppt-master](https://github.com/hugohe3/ppt-master)(17,782 stars),做完调研走方案 C——借 P0 三件 + P1 一件 + 战略上明示边界推荐对方。
+
+**关键背景**:PPT Master 是 484MB 的 Python 完整工程,核心是**自研 SVG → DrawingML 转换器**,产出真正可编辑的 PPTX。我们做不出,也没必要做——我们卖点是 HTML 现场演讲 + McKinsey 风深度锁死 + 培训片优化。两个工具是互补的,**饶秋诚实优先,推用户去用对方做"客户带回去改"的场景**。
+
+### ✨ 新增
+
+#### 1. spec_lock 长 deck 防漂移机制(借鉴 ppt-master 第 28 条铁律)
+
+**加在哪**:新建 `references/spec-lock-template.md`(290 行),`SKILL.md` 工作流加 Step 1.6。
+
+**触发条件**:培训片 ≥ 20 页 / 客户提案 ≥ 12 页 / Mode B / Mode C 加 ≥ 5 页。
+
+**做什么**:动笔前输出完整 spec_lock(YAML 格式 · 12 个字段:colors / fonts / client_override / pii_safety / data_sources / rhythm / layouts_used / charts ...),**生成每一页前重读一次**,所有颜色/字体/客户名/数据 hex 必须从 spec_lock 取,不许凭记忆。
+
+**为什么是 P0**:v4 时代我们撞过同一个坑——做 20+ 页培训片时,主色 `#051C2C` 从第 7 张悄悄滑到 `#0A2540`。当时只改 CSS 用 `var()` 兜底,没沉淀方法。这次把方法补回来:**不靠 CSS 兜底,靠生成时纪律**。PPT Master 把这条写成"SPEC_LOCK RE-READ PER PAGE"红线,17.8k stars 验证了价值。
+
+#### 2. Quality Gate 导出前硬门控(借鉴 ppt-master `svg_quality_checker.py`)
+
+**加在哪**:`scripts/raoqiu-check.sh` 加 `--strict` 标志;`scripts/export-pdf.sh` + `scripts/export-pptx.sh` 都加前置门控调用(导出前自动跑 `--strict`,FAIL 不导出)。
+
+**用法**:
+- 普通自检:`bash scripts/raoqiu-check.sh <file.html>`
+- 严格门控:`bash scripts/raoqiu-check.sh --strict <file.html>`(P0 不通过 → `⛔ GATE FAILED · 禁止导出`)
+- 导出脚本已内置:`bash scripts/export-pdf.sh <file.html>` 自动先跑门控
+- 紧急绕过:`--skip-gate`(责任自负)
+
+**为什么是 P0**:之前 P0 自检是"建议必跑",AI 急着交付时会跳。v5.6 改成"导出脚本强制先跑,FAIL 不导出"——绕不过去。借鉴 PPT Master 的"`error must be fixed before proceeding`"思想。
+
+#### 3. 多渠道输入工具表(借鉴 ppt-master `source_to_md/*.py`)
+
+**加在哪**:新建 `references/source-input.md`(220 行)。
+
+**包含**:PDF / DOCX / Excel / 微信公众号 / 网页 / PPTX / 图片 7 种输入类型的工具选型 + 命令模板:
+- PDF → `pdftotext`(简单) / `marker-pdf`(复杂扫描件)
+- DOCX → `pandoc`
+- Excel → `openpyxl` 一行脚本(模板提供)
+- 微信公众号 → `curl_cffi` 或直接用 Claude `WebFetch`(更简单)
+- PPTX → `python-pptx` 拆素材脚本(模板提供)
+
+**与 PPT Master 的差异**:**我们不内置脚本**(写了也是封装别人的工具,徒增维护成本),给一张选型表 + 命令模板,用户自己装自己跑。优点:轻、灵活、出错好定位。傻瓜式一键转换用 PPT Master 自己的工具。
+
+#### 4. examples/ 真实成片示范库(借鉴 ppt-master 22 个 deck 309 页)
+
+**加在哪**:新建 `examples/` 目录 + 4 个子目录(training / client-proposal / laimei / xhs-or-self-media)+ README.md(详细的脱敏规则)。
+
+**怎么用**:Mode A 开始前 `Step 0.5` 先看 `examples/<scenario>/` 对应子目录,有就 `Read` 示范片学版式 / 节奏 / 体感,没有就跳过——不会因为目录空导致流程卡住。
+
+**脱敏 P0 红线**:客户真名 / 学员真名 / 团队真名 / 莱美内部数据 / 健康具体值 / 陶勇医生相关 / 手机号身份证全部禁止。配有自检 grep 命令。
+
+**现状**:占位符已建好,等饶秋逐步填入真实成片(优先培训片,因为样本最有用)。
+
+#### 5. 战略边界声明(借鉴 ppt-master 的存在 + 饶秋"诚实优先"人格)
+
+**加在哪**:SKILL.md Step -1 之后加"⚠️ 边界声明"段;CHANGELOG 这条;README 同步。
+
+**核心**:用一张表说清楚 8 个场景下用哪个工具(本技能 vs PPT Master)。两个工具是互补关系,不是替代。最佳工作流:**现场用本技能 HTML 演讲 + 同一份内容用 PPT Master 出可编辑 PPTX 给客户带走**。
+
+**为什么这条最重要**:
+- **诚实**:不假装我们 PPTX 是"完整的 PPT",其实就是图片
+- **不夺人之美**:对方做了 484MB 工程,我们尊重
+- **反而抬高自己**:用户跟随推荐走,信我们的判断
+- 饶秋人格四特质全占了:知行合一 / 追问本质 / 诚实优先 / 安静的深度
+
+### 🔁 改进
+
+- **SKILL.md description**:加入"spec_lock / Quality Gate / 多渠道输入 / examples"四个关键词 + 边界声明
+- **tags**:新增 `spec-lock` / `quality-gate` / `multi-input` 三个标签
+- **SKILL.md 工作流**:在 Step 1 前加 Step 0.5(看 examples)、Step 1.5 后加 Step 1.6(锁 spec_lock)、Step 4 升级为"P0 人工对照 + `--strict` 脚本门控 + 导出脚本内置门控 + spec_lock 抽查"四阶段
+- **export-pdf.sh** + **export-pptx.sh** 注释头部都加了"如需原生可编辑 PPTX → 推荐 hugohe3/ppt-master"
+- **export-pptx.sh** 命名从"可编辑 PPTX 导出"诚实改为"图片版 PPTX 导出"
+
+### 📂 文件变更
+
+```
+references/spec-lock-template.md  新建 290 行
+references/source-input.md        新建 220 行
+examples/README.md                新建 80  行
+examples/{training,client-proposal,laimei,xhs-or-self-media}/_placeholder.md  4 个占位
+scripts/raoqiu-check.sh           +30 行(--strict 模式 + 失败提示升级)
+scripts/export-pdf.sh             +25 行(Quality Gate 前置门控)
+scripts/export-pptx.sh            +35 行(Quality Gate 前置门控 + 边界声明)
+SKILL.md                          version 5.5.0 → 5.6.0 + 边界声明 + Step 0.5 + Step 1.6 + Step 4 升级
+CHANGELOG.md                      +110 行(本条)
+```
+
+### ⚠️ 不借的(明确决策)
+
+- **SVG → DrawingML 转换器**:对方 484MB 核心工程,我们做不出也没必要做 → **推荐用户去用他们**
+- **动画 / TTS / 视频导出 / 声音克隆**:太重,不在职责范围 → 推荐
+- **模板复刻**(读 .pptx 提主题色):我们锁死 McKinsey 不需要复刻别人风格
+- **8 Confirmations BLOCKING 流程**:跟我们 Mode A 现有"边写边对齐"风格冲突,且我们已经评估过 frontend-slides 类似流程不借
+- **造 6 个 source_to_md/*.py 脚本**:不背 Python 项目复杂度,给工具表 + 命令模板就够
+
+### 🎯 用法变化(对老用户)
+
+**Mode B 用户**:
+- 现在可以处理 PDF / DOCX / Excel / 微信公众号 / 网页 / PPTX 7 种输入(查 `references/source-input.md`)
+- 长 deck(≥ 20 页培训片 / ≥ 12 页提案)在大纲后多走一步 Step 1.6 锁 spec_lock
+
+**Mode A / Mode C 用户**:
+- 改 PPT 前先 `ls examples/<scenario>/` 看有没有示范片,有就先 Read 一份学手感
+- 导出前自动跑 `--strict` 门控,P0 不通过不许导出(紧急可 `--skip-gate`)
+
+**全员**:
+- 客户问"能不能在 PowerPoint 里改字"→ 现在有明确答案:本技能产出图片版,要可编辑用 PPT Master
+- PPT Master 本地副本在 `/Users/raoyuli/Desktop/Skills/02-参考资料-References/演示工具-PresentationTools/他山之石-OtherSlideSkills/ppt-master/`
+
+### 🔬 验证方式
+
+- [x] SKILL.md frontmatter YAML 解析正常,Skill 列表显示 v5.6
+- [x] `raoqiu-check.sh --strict` 在 FAIL 时 exit 1 + 打印"GATE FAILED"
+- [x] `export-pdf.sh` / `export-pptx.sh` 调用门控,FAIL 时不进入 Playwright
+- [x] `examples/` 目录结构 + 4 个占位都在位
+- [x] PPT Master 本地副本 80MB 已 clone 到 References 库
+- [ ] **下次做长培训片时,实际用一次 spec_lock 流程验证防漂移效果**
+
+---
+
 ## v5.5.0 · 2026-05-18(借鉴 3 个外部仓库,补齐"文字太单一了"的洞)
 
 **主线**:饶秋读了 3 个 GitHub PPT 仓库——zarazhangrui/frontend-slides(17.8k stars)+ code-on-sunday/slide-deck-generator + robonuggets/marp-slides——决定**做 P0(4 件)+ P1(2 件)**。重点是 SVG 配图,补"文字太单一"的洞。

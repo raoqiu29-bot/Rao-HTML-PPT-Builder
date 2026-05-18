@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 #
-# Rao-HTML-to-PPT · PDF 导出脚本(v5 升级)
-# 借鉴 zarazhangrui/frontend-slides 的 export-pdf.sh
+# Rao-HTML-to-PPT · PDF 导出脚本(v5.6 升级 · 加 Quality Gate 前置门控)
+# 借鉴 zarazhangrui/frontend-slides 的 export-pdf.sh + hugohe3/ppt-master 的 Gate 思想
 #
 # 用法:
 #   bash scripts/export-pdf.sh <input.html> [output.pdf] [--compact]
+#   bash scripts/export-pdf.sh <input.html> --skip-gate          # 紧急情况绕过门控
 #
 # 参数:
 #   input.html   - 要导出的 HTML PPT(必填)
 #   output.pdf   - 输出 PDF 路径(可选,默认放在 input.html 同目录)
 #   --compact    - 用 1280x720 替代 1920x1080(文件小 50-70%,适合邮件发送)
+#   --skip-gate  - 跳过 raoqiu-check --strict 门控(默认会先跑一遍,FAIL 不导出)
 #
 # 依赖:
 #   Node.js + npx + playwright(首次跑会自动装 Chromium,约 150MB,30-60s)
@@ -22,24 +24,51 @@ set -euo pipefail
 INPUT=""
 OUTPUT=""
 COMPACT="false"
+SKIP_GATE="false"
 
 for arg in "$@"; do
   case "$arg" in
-    --compact) COMPACT="true" ;;
-    *.html)    INPUT="$arg" ;;
-    *.pdf)     OUTPUT="$arg" ;;
-    *)         echo "[警告] 未识别参数: $arg" ;;
+    --compact)    COMPACT="true" ;;
+    --skip-gate)  SKIP_GATE="true" ;;
+    *.html)       INPUT="$arg" ;;
+    *.pdf)        OUTPUT="$arg" ;;
+    *)            echo "[警告] 未识别参数: $arg" ;;
   esac
 done
 
 if [[ -z "$INPUT" ]]; then
-  echo "用法: bash scripts/export-pdf.sh <input.html> [output.pdf] [--compact]"
+  echo "用法: bash scripts/export-pdf.sh <input.html> [output.pdf] [--compact] [--skip-gate]"
   exit 1
 fi
 
 if [[ ! -f "$INPUT" ]]; then
   echo "[错误] 找不到文件: $INPUT"
   exit 1
+fi
+
+# ======================================================================
+# Quality Gate · 导出前必跑(可用 --skip-gate 跳过,但不推荐)
+# ======================================================================
+if [[ "$SKIP_GATE" == "false" ]]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  CHECK_SCRIPT="${SCRIPT_DIR}/raoqiu-check.sh"
+  if [[ -f "$CHECK_SCRIPT" ]]; then
+    echo "[gate] 跑 P0 自检门控(--strict 模式)..."
+    echo ""
+    if ! bash "$CHECK_SCRIPT" --strict "$INPUT"; then
+      echo ""
+      echo "[gate] ⛔ Quality Gate 不通过,禁止导出 PDF。"
+      echo "[gate] 修完 P0 后重跑;紧急情况可加 --skip-gate 绕过(不推荐)"
+      exit 1
+    fi
+    echo ""
+    echo "[gate] ✅ Quality Gate 通过,继续导出..."
+    echo ""
+  else
+    echo "[gate] 警告:找不到 raoqiu-check.sh,跳过门控"
+  fi
+else
+  echo "[gate] ⚠️  --skip-gate 已启用,跳过 P0 自检(责任自负)"
 fi
 
 # 默认输出路径:同目录,扩展名换成 .pdf

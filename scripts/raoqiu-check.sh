@@ -1,22 +1,47 @@
 #!/usr/bin/env bash
 #
-# Rao-HTML-to-PPT · 一键自检脚本(v5 升级)
-# 借鉴 tmustier/clean-slides 的 pptx validate 思路
+# Rao-HTML-to-PPT · 一键自检脚本(v5.6 升级 · 增加 --strict 硬门控模式)
+# 借鉴 tmustier/clean-slides 的 pptx validate 思路 + hugohe3/ppt-master 的 Quality Gate
 #
 # 用法:
-#   bash scripts/raoqiu-check.sh <file.html>
+#   bash scripts/raoqiu-check.sh <file.html>              # 普通模式 · 报告检查结果
+#   bash scripts/raoqiu-check.sh --strict <file.html>     # 严格模式 · 导出前的硬门控
 #
 # 检查内容(对应 checklist.md 的 P0-P3):
 #   - 结构层(P0):.page 包装 / page-footer 残留 / h2 标题用法 / section 数
 #   - 字体层(P0):衬线只用 5 处 / 禁用字体 / 衬线字体名正确
 #   - 颜色层(P0):AI 风颜色 / 渐变 / 玻璃拟态
 #   - 内容层(P0/P1):emoji 装饰 / 卡片密度 / Ghost Deck Test 提示
+#
+# --strict 模式(v5.6 新增):
+#   - 任何 P0 不通过都会 exit 1,且打印"GATE FAILED · 禁止导出"
+#   - export-pdf.sh / export-pptx.sh 在调用前必须先跑这个,且 FAIL 不许导出
+#   - 借鉴 PPT Master 的 Quality Gate 思想:有 error 必须修完才能继续
 
 set -uo pipefail
 
+# 解析 --strict 标志
+STRICT_MODE=0
+ARGS=()
+for arg in "$@"; do
+  if [[ "$arg" == "--strict" ]]; then
+    STRICT_MODE=1
+  else
+    ARGS+=("$arg")
+  fi
+done
+# set -- on empty array under set -u would error; guard it
+if [[ ${#ARGS[@]} -gt 0 ]]; then
+  set -- "${ARGS[@]}"
+else
+  set --
+fi
+
 F="${1:-}"
 if [[ -z "$F" ]]; then
-  echo "用法: bash scripts/raoqiu-check.sh <file.html>"
+  echo "用法:"
+  echo "  bash scripts/raoqiu-check.sh <file.html>           # 普通模式"
+  echo "  bash scripts/raoqiu-check.sh --strict <file.html>  # 严格模式(导出前必跑)"
   exit 1
 fi
 if [[ ! -f "$F" ]]; then
@@ -212,13 +237,30 @@ printf "  ${GREEN}✓ 通过: %d${NC}  ${RED}✗ 不通过: %d${NC}  ${YELLOW}! 
 
 if [[ "$FAIL" -eq 0 ]]; then
   echo ""
-  echo -e "${GREEN}${BOLD}P0 全部通过 · 合格的饶秋老师 PPT${NC}"
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
+    echo -e "${GREEN}${BOLD}✅ GATE PASSED · P0 全部通过 · 允许导出${NC}"
+  else
+    echo -e "${GREEN}${BOLD}P0 全部通过 · 合格的饶秋老师 PPT${NC}"
+  fi
   if [[ "$WARN" -gt 0 ]]; then
     echo -e "${YELLOW}有 $WARN 个警告,看清楚是否真的有问题${NC}"
   fi
   exit 0
 else
   echo ""
-  echo -e "${RED}${BOLD}P0 有 $FAIL 项不通过 · 必须修完才能交付${NC}"
+  if [[ "$STRICT_MODE" -eq 1 ]]; then
+    echo -e "${RED}${BOLD}⛔ GATE FAILED · P0 有 $FAIL 项不通过 · 禁止导出${NC}"
+    echo ""
+    echo -e "${YELLOW}导出前必须修完所有 P0 项。修完后重跑:${NC}"
+    echo -e "  ${BOLD}bash scripts/raoqiu-check.sh --strict $F${NC}"
+    echo ""
+    echo -e "${YELLOW}修不动的话:${NC}"
+    echo -e "  · 看 references/checklist.md 的 P0 段(每条都有现象 + 根因 + 做法)"
+    echo -e "  · 看 references/design-system.md 的 Anti AI-slop 反清单"
+    echo -e "  · 实在不行,回到 references/spec-lock-template.md 重新对账"
+  else
+    echo -e "${RED}${BOLD}P0 有 $FAIL 项不通过 · 必须修完才能交付${NC}"
+    echo -e "${YELLOW}提示:导出前请用 ${BOLD}--strict${NC}${YELLOW} 模式跑一遍,FAIL 不许导出${NC}"
+  fi
   exit 1
 fi

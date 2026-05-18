@@ -1,22 +1,29 @@
 #!/usr/bin/env bash
 #
-# Rao-HTML-to-PPT · HTML PPT → 可编辑 PPTX 导出脚本(v5.4)
-# 借鉴 PptxGenJS + Playwright 工业标准
+# Rao-HTML-to-PPT · HTML PPT → 图片版 PPTX 导出脚本(v5.6 升级 · 加 Quality Gate)
+# 借鉴 PptxGenJS + Playwright 工业标准 + hugohe3/ppt-master 的 Gate 思想
 #
 # 用法:
 #   bash scripts/export-pptx.sh <input.html> [output.pptx] [--compact]
+#   bash scripts/export-pptx.sh <input.html> --skip-gate                 # 跳过 P0 门控
 #
 # 参数:
 #   input.html   - 要导出的 HTML PPT(必填,Rao-HTML-to-PPT v5.x 生成的)
 #   output.pptx  - 输出 PPTX 路径(可选,默认放在 input.html 同目录)
 #   --compact    - 用 1280x720 替代 1920x1080(文件小 50-70%,适合邮件发送)
+#   --skip-gate  - 跳过 raoqiu-check --strict 门控(紧急情况,不推荐)
+#
+# ⚠️ 重要:本脚本产出的 PPTX 是"图片版" — 每页是一张大图,在 PowerPoint 里不能编辑文字
+#    如果用户需要"原生可编辑 PPTX"(每个形状/文本/图表都能改),
+#    强烈推荐 hugohe3/ppt-master:https://github.com/hugohe3/ppt-master
+#    详见 README "何时用 PPT Master vs 本技能" 章节
 #
 # 实现机制(alpha 版):
 #   - Playwright headless Chromium 加载 HTML PPT
 #   - 跳到每一页 + 截图(1920x1080 PNG)
 #   - PptxGenJS 创建 16:9 .pptx,每页嵌一张全屏图片
 #   - 客户能在 PowerPoint / Keynote 打开 → 看到 100% 一致视觉
-#   - **限制**:每页是图片,不能改文字(如需真"可编辑",等 v5.4-beta 用 dom-to-pptx)
+#   - 用途定位:存档 / 分享 / 给客户邮箱发个轻量备份,不适合二次编辑
 #
 # 依赖:
 #   Node.js + npx + playwright + pptxgenjs(首次跑会自动装,约 200MB,30-90s)
@@ -29,24 +36,51 @@ set -euo pipefail
 INPUT=""
 OUTPUT=""
 COMPACT="false"
+SKIP_GATE="false"
 
 for arg in "$@"; do
   case "$arg" in
-    --compact) COMPACT="true" ;;
-    *.html)    INPUT="$arg" ;;
-    *.pptx)    OUTPUT="$arg" ;;
-    *)         echo "[警告] 未识别参数: $arg" ;;
+    --compact)    COMPACT="true" ;;
+    --skip-gate)  SKIP_GATE="true" ;;
+    *.html)       INPUT="$arg" ;;
+    *.pptx)       OUTPUT="$arg" ;;
+    *)            echo "[警告] 未识别参数: $arg" ;;
   esac
 done
 
 if [[ -z "$INPUT" ]]; then
-  echo "用法: bash scripts/export-pptx.sh <input.html> [output.pptx] [--compact]"
+  echo "用法: bash scripts/export-pptx.sh <input.html> [output.pptx] [--compact] [--skip-gate]"
   exit 1
 fi
 
 if [[ ! -f "$INPUT" ]]; then
   echo "[错误] 找不到文件: $INPUT"
   exit 1
+fi
+
+# ======================================================================
+# Quality Gate · 导出前必跑(可用 --skip-gate 跳过,但不推荐)
+# ======================================================================
+if [[ "$SKIP_GATE" == "false" ]]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  CHECK_SCRIPT="${SCRIPT_DIR}/raoqiu-check.sh"
+  if [[ -f "$CHECK_SCRIPT" ]]; then
+    echo "[gate] 跑 P0 自检门控(--strict 模式)..."
+    echo ""
+    if ! bash "$CHECK_SCRIPT" --strict "$INPUT"; then
+      echo ""
+      echo "[gate] ⛔ Quality Gate 不通过,禁止导出 PPTX。"
+      echo "[gate] 修完 P0 后重跑;紧急情况可加 --skip-gate 绕过(不推荐)"
+      exit 1
+    fi
+    echo ""
+    echo "[gate] ✅ Quality Gate 通过,继续导出..."
+    echo ""
+  else
+    echo "[gate] 警告:找不到 raoqiu-check.sh,跳过门控"
+  fi
+else
+  echo "[gate] ⚠️  --skip-gate 已启用,跳过 P0 自检(责任自负)"
 fi
 
 # 默认输出路径:同目录,扩展名换成 .pptx
