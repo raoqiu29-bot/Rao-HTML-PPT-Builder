@@ -3,7 +3,7 @@ name: Rao-HTML-to-PPT
 zh_name: "饶秋老师 HTML PPT 标准生成器"
 en_name: "Rao HTML to PPT"
 emoji: "🎯"
-description: 基于饶秋老师 McKinsey 风 HTML PPT 标准模板(v5.6),生成结构清晰、克制专业、带麦肯锡咨询气质的培训课件、汇报演讲、提案材料。**支持三种模式**:Mode A 新建一份 PPT / Mode B 把 Markdown 大纲转成 PPT / Mode C 改/优化/扩展已有 HTML PPT。当用户要求"做 PPT""做培训课件""做汇报""做客户提案""把大纲变成 PPT""改一下这页""加一页讲 XX""更新这份课件的数据""按我的风格做"时,必须使用此技能。也支持 PDF 导出、PPTX 导出和一键自检脚本。包括但不限于:Cowork 中上传课程大纲生成 HTML PPT / 给老课件改局部 / 客户提案 / AIGC 培训交付。即使用户没明说"麦肯锡风",只要场景是企业培训 / 咨询汇报 / 商业提案 / 个人分享 / 演讲材料,都应触发。**边界声明(v5.6)**:本技能产出的 PPTX 是图片版(不可二次编辑);如需原生可编辑 PPTX 让客户/学员带回去改,推荐用 hugohe3/ppt-master 配合。配套:Brand Style 卡片自动加载、Ghost Deck Test 标题串读自检、Citation 强制(借用数据必有来源)、双主题切换(纸/墨 v5.1)、Inline Editing(浏览器内 E 键编辑 v5.2)、培训片五段循环大纲模板(v5.5)、SVG 数据 Dashboard 版式库(v5.5)、SVG icon 库 24 个基础图标(v5.5)、Anti AI-slop 反清单(v5.5)、CSS Gotchas 踩坑警示档(v5.5)、**spec_lock 长 deck 防漂移机制(v5.6 · 每页重读)**、**Quality Gate 导出前硬门控(v5.6 · raoqiu-check --strict)**、**多渠道输入工具表 PDF/DOCX/Excel/URL/PPTX→Markdown(v5.6)**、**examples/ 真实成片示范库(v5.6)**、scripts/ 提供 PDF 和 PPTX 导出 + 合规自检。
+description: 基于饶秋老师 McKinsey 风 HTML PPT 标准模板(v5.8),生成结构清晰、克制专业、带麦肯锡咨询气质的培训课件、汇报演讲、提案材料。**支持四种模式**:Mode A 新建一份 PPT / Mode B 把 Markdown 大纲转成 PPT / Mode C-edit 改/优化/扩展已有 HTML PPT / **Mode C-enhance 升级老课件到最新标准(v5.8 新增)**。当用户要求"做 PPT""做培训课件""做汇报""做客户提案""把大纲变成 PPT""改一下这页""加一页讲 XX""更新这份课件的数据""按我的风格做"**或"按我的格式调整这份老课件 / 重新做一遍 / 升级"**时,必须使用此技能。也支持 PDF 导出、PPTX 导出和一键自检脚本。包括但不限于:Cowork 中上传课程大纲生成 HTML PPT / 给老课件改局部 / 客户提案 / AIGC 培训交付 / 升级旧版课件到最新 v5.8 标准。即使用户没明说"麦肯锡风",只要场景是企业培训 / 咨询汇报 / 商业提案 / 个人分享 / 演讲材料,都应触发。**边界声明**:本技能产出的 PPTX 是图片版(不可二次编辑);如需原生可编辑 PPTX,推荐用 hugohe3/ppt-master 配合。配套:Brand Style 卡片自动加载、Ghost Deck Test 标题串读自检、Citation 强制、双主题切换(纸/墨 v5.1)、Inline Editing(E 键编辑 v5.2)、培训片五段循环大纲模板(v5.5)、SVG 数据 Dashboard 版式库(v5.5)、SVG icon 库 24 个基础图标(v5.5)、Anti AI-slop 反清单(v5.5)、CSS Gotchas 踩坑警示档(v5.5)、spec_lock 长 deck 防漂移机制(v5.6)、Quality Gate 导出前硬门控(v5.6)、多渠道输入工具表(v5.6)、examples/ 真实成片示范库(v5.6)、**Lightbox 双击放大 + 单击复制提示词(v5.7 · 饶秋实战明确价值)**、**audit-deck.sh 老课件审计工具(v5.8 · 一键检测 8 个标准模块缺哪些)**、**Mode C-enhance 升级老课件标准工作流(v5.8 · upgrade-existing-deck.md)**、scripts/ 提供 PDF 和 PPTX 导出 + 合规自检 + 老课件审计。
 category: slides
 scenario: training-presentation
 surface: ["keynote-live", "pdf-archive", "pptx-editable", "html-share", "wechat-article"]
@@ -11,8 +11,8 @@ design_system: mckinsey-paper-dark
 aspect_hint: "16:9"
 modes: ["A-new", "B-outline-to-deck", "C-enhance-existing"]
 themes: ["mckinsey-blue", "paper-ink", "dark-botanical"]
-version: "5.7.0"
-tags: ["training", "presentation", "mckinsey", "paper-ink", "dark-botanical", "chinese", "consulting", "html-slides", "wysiwyg-edit", "svg-charts", "dashboard", "training-cycle", "anti-ai-slop", "spec-lock", "quality-gate", "multi-input", "lightbox-zoom", "click-to-copy"]
+version: "5.8.0"
+tags: ["training", "presentation", "mckinsey", "paper-ink", "dark-botanical", "chinese", "consulting", "html-slides", "wysiwyg-edit", "svg-charts", "dashboard", "training-cycle", "anti-ai-slop", "spec-lock", "quality-gate", "multi-input", "lightbox-zoom", "click-to-copy", "upgrade-existing-deck", "audit-tool"]
 repo: "https://github.com/raoqiu29-bot/Rao-HTML-to-PPT"
 license: MIT
 ---
@@ -199,6 +199,48 @@ bash scripts/raoqiu-check.sh <改后的文件>
 **没有示范片就**:跳过,按默认流程走。**不要因为目录空导致流程卡住**——examples 是辅助,不是前置。
 
 详细规则 + 脱敏要求见 `examples/README.md`。
+
+### Step 0.6 · Mode C-enhance · 升级老课件(v5.8 新增 · 强制走 audit)
+
+**触发条件**:用户给一份已有 HTML PPT 文件,说"按饶秋格式调整 / 升级 / 重做 / 改" — 不是从零做,而是改造老课件。
+
+**典型用户语言**:
+- "把这个 HTML 重新做一遍"
+- "按你的标准格式调整这份课件"
+- "我给你一份课件,帮我升级"
+- "这份 PPT 加上你的双击放大、E 键编辑、主题切换功能"
+
+**为什么强制走专门流程**:历史踩坑(2026-05-18 锦江学院案例)— AI 凭直觉 patch 老课件,会反复漏装功能(用户报"按 E 没反应""按 T 没反应"),来回三轮才搞定。**根因是没系统性 audit 源文件**。
+
+**v5.8 标准流程**:
+
+```bash
+# Step 1 (必做) · audit 源文件
+bash scripts/audit-deck.sh <用户给的老课件.html>
+# 输出 8 个标准模块的 PASS/PARTIAL/MISSING + 3 个 Quality Gate 兼容性检查
+
+# Step 2 · 按 audit 报告对照 references/upgrade-existing-deck.md "补丁清单"
+#   - PASS  → 该模块齐全,跳过
+#   - PARTIAL → 该模块 CSS/DOM/JS 三段里某段缺,补缺的那段
+#   - MISSING → 整套都缺,完整移植(本文档"补丁清单"给出每个模块从 template.html 哪几行抓)
+
+# Step 3 · 验证
+bash scripts/audit-deck.sh <桌面文件>           # 应 8/8 PASS
+bash scripts/raoqiu-check.sh --strict <桌面文件> # 应 12/12 P0 PASS
+```
+
+**8 个标准模块**(每一个 audit 都会查):
+
+1. v5.1 双主题切换(Paper / Dark · T 键)
+2. v5.2 Inline Editing(E 键编辑 + Ctrl+S 保存)
+3. **v5.7 Lightbox 双击放大** ← 饶秋 2026-05 实战明确反馈"非常有用",升级为必备
+4. v5.7 单击 .prompt-block 复制
+5. v5.6 BFCache 防御 + Cache-Control
+6-8. v5.x Slideshow / TOC / Overview 引擎(老 deck 通常都有)
+
+**详细工作流 + 每个模块从 template.html 哪几行抓**:见 `references/upgrade-existing-deck.md`(完整端到端文档,含历史踩坑记录)。
+
+**spec_lock 强制登记**:Mode C-enhance 任务必须在 spec_lock 的 `source_audit` 字段填完 8 个模块的 verdict + 3 个 Quality Gate 兼容性 + patch_plan。
 
 ### Step 1 · 需求澄清(动手前必做,绝不跳过)
 
@@ -500,7 +542,12 @@ bash scripts/export-pptx.sh <file.html>     # 内置 gate,FAIL 不导
 
 **饶秋实战教训**:某次现场用 Chrome 打开 v5.2 PPT,翻页失效;Safari 同文件完全正常。根因是 Chrome 装了"沙拉查词 / 沉浸式翻译 / Vimium"等扩展拦截键盘事件。**结论:Chrome 日常用,PPT 现场用 Safari**。
 
-### 7.4.5 鼠标交互升级(v5.7 新增 · 双击放大 + 单击复制)
+### 7.4.5 鼠标交互升级(v5.7 新增 · 双击放大 + 单击复制 · ⭐ 饶秋 2026-05 实战明确价值)
+
+> **饶秋老师 2026-05-18 锦江学院课件升级后实战反馈**:
+> > "在卡片上双击可以放大这个点真的很好。建议升级到我们的 skill 里去做一个更新。"
+>
+> → 已升级为 v5.8 **必备标准模块**,所有 deck 自动带 · `scripts/audit-deck.sh` 强制验证。
 
 **痛点**:之前鼠标点击页面没什么用 — 不能放大看细节,不能复制内容,容易误触。
 

@@ -8,6 +8,161 @@
 
 ---
 
+## v5.8.0 · 2026-05-18(Mode C-enhance 升级老课件标准化 + audit-deck 工具 + Lightbox 价值正式确认)
+
+**主线**:2026-05-18 锦江学院 v0.1 课件升级实战中,反复踩坑两次("按 E 没反应""按 T 没反应")— 根因是 AI 没系统性 audit 老文件缺哪些模块,凭直觉补丁。这次把 Mode C-enhance(升级老课件)做成标准工作流,绝不再来回踩。
+
+### ✨ 新增
+
+#### 1. scripts/audit-deck.sh · 老课件审计脚本(本次最重磅)
+
+**输入**:任何老 HTML PPT
+**输出**:8 个 v5.x 标准模块的 PASS/PARTIAL/MISSING 表格报告 + 3 个 Quality Gate 兼容性反向检测
+
+```bash
+bash scripts/audit-deck.sh <老课件.html>
+# 或 JSON 格式给程序消费:
+bash scripts/audit-deck.sh <老课件.html> --json
+```
+
+**8 个标准模块**(每个独立 grep CSS / DOM / JS 三段):
+
+| # | 模块 | since |
+|---|---|---|
+| 1 | 双主题切换(Paper / Dark) | v5.1 |
+| 2 | Inline Editing(E 键编辑) | v5.2 |
+| 3 | **Lightbox 双击放大** ⭐ | v5.7 |
+| 4 | 单击 prompt-block 复制 | v5.7 |
+| 5 | BFCache 防御 | v5.6 |
+| 6 | Slideshow 翻页核心 | v5.x |
+| 7 | 大纲面板 M 键 | v5.x |
+| 8 | 概览模式 O 键 | v5.x |
+
+**3 个反向检测**(应为 0):
+- `.page-footer` 残留(v4 弃用,会被翻页按钮遮挡)
+- emoji 装饰(✅🎯💡🚀⭐🔥📊🎨🏆⚡)
+- `<div class="page-title">` 错位用 div(应该用 h2)
+
+**审计工具甚至反向揪出 skill 自己的 bug** — 这次 audit 锦江文件时发现 inline-edit CSS 缺(我之前 patch 时只补 DOM+JS 漏了 CSS),audit 工具是第一个发现的。也就是说**这个工具不仅给老课件用,template.html 自己也要定期跑一遍自查**。
+
+#### 2. references/upgrade-existing-deck.md · Mode C-enhance 完整工作流文档
+
+**150+ 行的端到端文档**,包括:
+- 5 步标准流程(audit → spec_lock → 备份 → 注入 → 验证)
+- **每个模块的精确补丁清单**:从 template.html 第几行抓什么(行号都给死)
+- 注入位置精确说明(`</style>` 前 / ctrl-bar 内 / `</body>` 前)
+- emoji 标准替换表(✅→绿色 h4 / ❌→红色 h4 / 等)
+- 历史踩坑记录(锦江案例完整教训)
+- 反向应用:也用来给 template.html 自己做健康检查
+
+#### 3. references/spec-lock-template.md 新增 source_audit 字段
+
+Mode C-enhance 任务**必须填**:
+```yaml
+source_audit:
+  audit_command: "bash scripts/audit-deck.sh <源文件>"
+  modules:
+    theme_switch:    PASS/PARTIAL/MISSING
+    inline_editing:  PASS/PARTIAL/MISSING
+    lightbox_zoom:   PASS/PARTIAL/MISSING
+    click_to_copy:   PASS/PARTIAL/MISSING
+    bfcache_defense: PASS/PARTIAL/MISSING
+    slideshow_core:  PASS/PARTIAL/MISSING
+    toc_panel:       PASS/PARTIAL/MISSING
+    overview_grid:   PASS/PARTIAL/MISSING
+  quality_gate_compat:
+    page_footer_legacy:    0
+    emoji_decoration:      0
+    page_title_div_misuse: 0
+  patch_plan:
+    - module: <name>
+      action: "从 template.html LL-MM 抓 XX,注入到 YY 前"
+      done: false
+```
+
+强制走这一步,**就没"凭直觉补丁来回踩"的空间**。
+
+#### 4. SKILL.md 新增 Step 0.6 · Mode C-enhance 入口
+
+**触发**:用户给老 HTML 文件说"按你的格式调整 / 升级 / 重做"
+
+**强制走**:audit → 对照 patch 清单 → 验证
+
+**模式数从 3 个升到 4 个**:Mode A 新建 / Mode B 大纲转 / **Mode C-edit 改局部** / **Mode C-enhance 升级老课件**(后两个细化区分)
+
+#### 5. Lightbox 双击放大 · 正式升为必备标准模块
+
+**饶秋老师 2026-05-18 锦江学院实战后反馈**:
+
+> "在卡片上双击可以放大这个点真的很好。建议升级到我们的 skill 里去做一个更新。"
+
+**做法**:
+- SKILL.md §7.4.5 头部加入实战反馈引用
+- 它已经是 v5.7 模板自带,**v5.8 通过 audit-deck.sh 把它列为 8 个必备标准模块之一**
+- 所有未来 deck + 所有老 deck 升级时,Lightbox 都必须存在
+
+### 🔁 改进
+
+- **scripts/audit-deck.sh 改正了 1 个 false positive**:click-to-copy 的 toast 是 JS 动态 createElement 创建的,DOM 检测改用 `className.*copy-toast` 而不是静态 `class="copy-toast"`
+- **SKILL.md description** 加入 4 个新关键词:`Mode C-enhance` / `audit-deck` / `升级老课件` / `Lightbox 实战明确价值`
+- **tags 加 2 个**:`upgrade-existing-deck` / `audit-tool`
+
+### 📂 文件变更
+
+```
+scripts/audit-deck.sh                       新建 230 行(8 模块 grep + 3 兼容性检测 + JSON / 人类双输出模式)
+references/upgrade-existing-deck.md         新建 300 行(完整工作流 + 补丁清单 + 历史踩坑)
+references/spec-lock-template.md            +28 行(source_audit 字段)
+SKILL.md                                    version 5.7.0 → 5.8.0
+                                            加 Step 0.6 Mode C-enhance 入口(40 行)
+                                            §7.4.5 头部加 Lightbox 实战反馈引用
+                                            description 更新 + tags +2
+CHANGELOG.md                                本条
+```
+
+### 🎯 用法变化(对老用户)
+
+**新场景**:用户给一份老 HTML PPT,说"按饶秋格式调整 / 升级 / 重做"
+
+```bash
+# 1. 一键 audit
+bash scripts/audit-deck.sh <老课件.html>
+
+# 2. 看报告,对照 references/upgrade-existing-deck.md 的补丁清单逐项补
+
+# 3. 验证(两个必须都过)
+bash scripts/audit-deck.sh <桌面文件>          # 8/8 PASS
+bash scripts/raoqiu-check.sh --strict <桌面文件> # 12/12 P0 PASS
+```
+
+**老场景**:Mode A / Mode B / Mode C-edit 工作流不动,但**未来生成的 deck 默认都有 v5.7 Lightbox**(因为它从 v5.7 起就是 template.html 自带)。
+
+### 🔬 实测验证
+
+- [x] `bash scripts/audit-deck.sh <锦江学院 HTML>` → 8/8 PASS · 0 dirty
+- [x] `bash scripts/audit-deck.sh assets/template.html` → 8/8 PASS · 0 dirty(template 自己自查)
+- [x] 故意拿源文件 v0.1 跑 audit → 报 5 个 MISSING / 1 个 PARTIAL,跟历史踩坑一致
+- [x] CHANGELOG / SKILL.md 描述 / spec-lock-template / upgrade-existing-deck 四份文档相互引用一致
+- [ ] **下次有用户给老课件时,实测端到端流程,看 audit + patch + 验证三步顺不顺**
+
+### 🧠 lessons learned 沉淀
+
+| Lesson | 写进哪里 |
+|---|---|
+| 凭直觉补丁老课件会反复踩坑,**先 audit 再补丁** | upgrade-existing-deck.md §为什么有这个工作流 |
+| 补 patch 时容易漏 CSS(只看 DOM + JS),**audit 三段独立检测 catch 这个** | upgrade-existing-deck.md §3a inline editing 警告 |
+| **audit 工具也能反向 catch skill 自己的 bug** | upgrade-existing-deck.md §反向应用 |
+| 客户实战反馈是 skill 升级最强信号(Lightbox 案例) | SKILL.md §7.4.5 头部引用 |
+
+### 📊 累计踩坑表(留档)
+
+| 日期 | 事件 | 解决 |
+|---|---|---|
+| 2026-05-18 | 锦江学院升级,先后报 inline editing + 主题切换 缺失,来回三轮 | 沉淀 audit-deck.sh + Mode C-enhance 工作流(v5.8) |
+| 2026-05-18 | audit 反向发现 inline-edit CSS 一直漏注入 | 修复 patch 流程 + 加入 upgrade-existing-deck.md 警示 |
+
+---
+
 ## v5.7.0 · 2026-05-18(鼠标交互升级 · 双击放大 + 单击复制 + 选文字不打架)
 
 **主线**:饶秋实测 v5.6 课件时反馈"鼠标点击没什么用 — 能不能加放大、动画、复制?"。这次直接给鼠标补上实质功能,而不只是"屏幕装饰"。

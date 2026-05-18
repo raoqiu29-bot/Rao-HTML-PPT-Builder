@@ -140,6 +140,35 @@ quality_gate:
   on_fail: hard_stop_no_export
 
 # ============================================================
+# Mode C-enhance 专用:升级老课件时必填(v5.8 新增)
+# ============================================================
+# 触发场景:用户给一份老 HTML PPT,要求"按饶秋格式调整 / 升级 / 重做"
+# 强制走 references/upgrade-existing-deck.md 工作流
+source_audit:
+  # 跑 audit-deck.sh 后把 8 个模块的 verdict 复制过来
+  # PASS / PARTIAL / MISSING
+  audit_command: "bash scripts/audit-deck.sh <源文件>"
+  modules:
+    theme_switch:    ""    # v5.1 双主题(Paper/Dark)
+    inline_editing:  ""    # v5.2 E 键编辑
+    lightbox_zoom:   ""    # v5.7 双击放大 ← 饶秋 2026-05 实战明确价值
+    click_to_copy:   ""    # v5.7 单击 prompt-block 复制
+    bfcache_defense: ""    # v5.6 BFCache 防御
+    slideshow_core:  ""    # v5.x 翻页核心
+    toc_panel:       ""    # v5.x 大纲面板 M 键
+    overview_grid:   ""    # v5.x 概览模式 O 键
+  quality_gate_compat:
+    page_footer_legacy: 0     # v4 弃用,要为 0
+    emoji_decoration:   0     # 装饰类 emoji,要为 0
+    page_title_div_misuse: 0  # page-title 用 div 错位,要为 0
+  patch_plan:
+    # 对每个 MISSING / PARTIAL 模块,列出补丁动作
+    # 按 references/upgrade-existing-deck.md 的"补丁清单"对应
+    - module: ""
+      action: ""    # 例:"从 template.html 1122-1364 抓主题 CSS,注入 </style> 前"
+      done: false
+
+# ============================================================
 # Per-page checklist · 写每一页前对照这份 spec_lock
 # ============================================================
 per_page_rules: |
