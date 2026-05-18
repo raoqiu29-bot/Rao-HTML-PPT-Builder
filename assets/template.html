@@ -1484,6 +1484,165 @@ body.edit-mode[data-theme="dark"] [contenteditable="true"]:focus{
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ============================================================
+   v5.7 · Lightbox 放大 + 一键复制提示词
+   ============================================================
+   设计目标:鼠标点击不再是"无意义"或"误触翻页",而是
+   - 双击元素 → 居中放大(看清细节 / 现场讲解时聚焦)
+   - 单击 .prompt-block → 一键复制(讲师常用)
+   - 选文字 → 默认行为(可 Cmd+C)
+   ============================================================ */
+
+/* 给可放大元素加 zoom-in 鼠标指针(视觉提示)*/
+.card, .metric, .step, .quadrant,
+.insight-page .insight-body, .big-number, .big-quote,
+.task-card, .matrix-2x2 .quadrant {
+  cursor: zoom-in;
+}
+/* 编辑模式下取消 zoom 提示(那时鼠标用来点击编辑文字)*/
+body.edit-mode .card,
+body.edit-mode .metric,
+body.edit-mode .step,
+body.edit-mode .quadrant,
+body.edit-mode .insight-page .insight-body,
+body.edit-mode .big-number,
+body.edit-mode .big-quote,
+body.edit-mode .task-card,
+body.edit-mode .matrix-2x2 .quadrant {
+  cursor: text;
+}
+
+/* prompt-block 特殊处理 · 单击即复制 + 双击放大 */
+.prompt-block {
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+.prompt-block:hover {
+  box-shadow: 0 4px 12px rgba(5, 28, 44, 0.12);
+}
+.prompt-block::after {
+  content: '⌘ 单击复制 · 双击放大';
+  position: absolute;
+  top: 0.5rem; right: 0.5rem;
+  background: var(--c-brand);
+  color: #fff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-family: var(--f-mono, monospace);
+  letter-spacing: 0.06em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.prompt-block:hover::after { opacity: 0.9; }
+body.edit-mode .prompt-block { cursor: text; }
+body.edit-mode .prompt-block::after { display: none; }
+
+/* === Lightbox 容器 === */
+.lightbox-overlay {
+  position: fixed; inset: 0;
+  background: rgba(8, 12, 20, 0.93);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 4vh 4vw;
+  cursor: zoom-out;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.lightbox-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+.lightbox-clone-wrap {
+  max-width: 90vw;
+  max-height: 90vh;
+  transform: scale(0.92);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+  overflow: auto;
+  border-radius: 14px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
+  background: var(--c-bg);
+}
+.lightbox-overlay.active .lightbox-clone-wrap {
+  transform: scale(1);
+}
+/* lightbox 内的克隆元素放大显示(撑满 wrap)*/
+.lightbox-clone-wrap > * {
+  padding: 2.5rem 3rem !important;
+  margin: 0 !important;
+  width: auto !important;
+  min-width: 60vw;
+  font-size: 1.15em;  /* 整体放大字号 */
+}
+.lightbox-clone-wrap .prompt-block::after { display: none; }  /* 放大后不再显示"复制"提示 */
+
+/* 关闭按钮 + 提示 */
+.lightbox-close {
+  position: fixed;
+  top: 1.5rem; right: 1.5rem;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  transition: background 0.15s;
+}
+.lightbox-close:hover { background: rgba(255, 255, 255, 0.22); }
+.lightbox-hint {
+  position: fixed;
+  bottom: 1.5rem; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  padding: 0.45rem 1rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--f-mono, monospace);
+  letter-spacing: 0.08em;
+  z-index: 10001;
+  pointer-events: none;
+}
+
+/* === 复制 toast === */
+.copy-toast {
+  position: fixed;
+  top: 1.8rem; right: 1.8rem;
+  background: #16A34A;
+  color: #fff;
+  padding: 0.65rem 1.1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 10002;
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity 0.2s, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.35);
+}
+.copy-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.copy-toast.error {
+  background: #DC2626;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.35);
+}
 </style>
 </head>
 <body class="theme-mckinsey">
@@ -2452,6 +2611,146 @@ document.getElementById('overview-btn').addEventListener('click', toggleOverview
 })();
 
 slideshow = new Slideshow();
+</script>
+
+<!-- ============================================================
+     v5.7 · Lightbox 放大 + 一键复制提示词 · JS
+     ============================================================
+     - 双击任何"可放大块" → 弹出居中放大(Lightbox)
+     - 单击 .prompt-block → 复制内容到剪贴板 + toast
+     - 编辑模式下(body.edit-mode)全部禁用,不打架
+     ============================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // === DOM 准备 ===
+  var overlay = document.createElement('div');
+  overlay.className = 'lightbox-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.innerHTML = [
+    '<button class="lightbox-close" type="button" aria-label="关闭放大">×</button>',
+    '<div class="lightbox-clone-wrap"></div>',
+    '<div class="lightbox-hint">点击空白 / Esc / × 关闭</div>'
+  ].join('');
+  document.body.appendChild(overlay);
+
+  var cloneWrap = overlay.querySelector('.lightbox-clone-wrap');
+  var closeBtn = overlay.querySelector('.lightbox-close');
+
+  var toast = document.createElement('div');
+  toast.className = 'copy-toast';
+  toast.setAttribute('aria-live', 'polite');
+  document.body.appendChild(toast);
+
+  // === Lightbox 开/关 ===
+  function openLightbox(element) {
+    var clone = element.cloneNode(true);
+    clone.classList.remove('active', 'hover', 'from-prev');
+    clone.querySelectorAll('[contenteditable]').forEach(function(el) {
+      el.removeAttribute('contenteditable');
+    });
+    if (clone.hasAttribute('contenteditable')) clone.removeAttribute('contenteditable');
+
+    cloneWrap.innerHTML = '';
+    cloneWrap.appendChild(clone);
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.documentElement.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.documentElement.style.overflow = '';
+    setTimeout(function() { cloneWrap.innerHTML = ''; }, 280);
+  }
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeLightbox();
+  });
+  closeBtn.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && overlay.classList.contains('active')) {
+      e.stopPropagation();
+      closeLightbox();
+    }
+  }, true);
+
+  // === 双击放大 ===
+  var zoomableSelectors = [
+    '.card', '.metric', '.step', '.quadrant',
+    '.insight-page .insight-body',
+    '.big-number', '.big-quote',
+    '.prompt-block', '.task-card',
+    '.process-flow', '.matrix-2x2'
+  ].join(', ');
+
+  document.addEventListener('dblclick', function(e) {
+    if (document.body.classList.contains('edit-mode')) return;
+    if (overlay.contains(e.target)) return;
+
+    var target = e.target.closest(zoomableSelectors);
+    if (target) {
+      e.preventDefault();
+      window.getSelection && window.getSelection().removeAllRanges();
+      openLightbox(target);
+    }
+  });
+
+  // === 单击 .prompt-block · 复制到剪贴板 ===
+  function showToast(msg, isError) {
+    toast.textContent = msg;
+    toast.classList.toggle('error', !!isError);
+    toast.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function() {
+      toast.classList.remove('show');
+    }, 1900);
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function(resolve, reject) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        resolve();
+      } catch (err) {
+        document.body.removeChild(ta);
+        reject(err);
+      }
+    });
+  }
+
+  document.addEventListener('click', function(e) {
+    if (document.body.classList.contains('edit-mode')) return;
+    if (overlay.contains(e.target)) return;
+    var sel = window.getSelection && window.getSelection().toString();
+    if (sel && sel.length > 0) return;
+
+    var pb = e.target.closest('.prompt-block');
+    if (!pb) return;
+
+    var clone = pb.cloneNode(true);
+    clone.querySelectorAll('.prompt-tag').forEach(function(el) { el.remove(); });
+    var text = clone.textContent.replace(/^\s+|\s+$/g, '');
+
+    copyText(text).then(function() {
+      showToast('✓ 已复制提示词到剪贴板');
+    }).catch(function() {
+      showToast('✗ 复制失败,请手动拖选', true);
+    });
+  });
+})();
 </script>
 </body>
 </html>

@@ -11,8 +11,8 @@ design_system: mckinsey-paper-dark
 aspect_hint: "16:9"
 modes: ["A-new", "B-outline-to-deck", "C-enhance-existing"]
 themes: ["mckinsey-blue", "paper-ink", "dark-botanical"]
-version: "5.6.1"
-tags: ["training", "presentation", "mckinsey", "paper-ink", "dark-botanical", "chinese", "consulting", "html-slides", "wysiwyg-edit", "svg-charts", "dashboard", "training-cycle", "anti-ai-slop", "spec-lock", "quality-gate", "multi-input"]
+version: "5.7.0"
+tags: ["training", "presentation", "mckinsey", "paper-ink", "dark-botanical", "chinese", "consulting", "html-slides", "wysiwyg-edit", "svg-charts", "dashboard", "training-cycle", "anti-ai-slop", "spec-lock", "quality-gate", "multi-input", "lightbox-zoom", "click-to-copy"]
 repo: "https://github.com/raoqiu29-bot/Rao-HTML-to-PPT"
 license: MIT
 ---
@@ -499,6 +499,31 @@ bash scripts/export-pptx.sh <file.html>     # 内置 gate,FAIL 不导
 | 分享给学员 / 客户 | **导出 PDF**(`bash scripts/export-pdf.sh`) | 学员环境不可控,PDF 永远稳 |
 
 **饶秋实战教训**:某次现场用 Chrome 打开 v5.2 PPT,翻页失效;Safari 同文件完全正常。根因是 Chrome 装了"沙拉查词 / 沉浸式翻译 / Vimium"等扩展拦截键盘事件。**结论:Chrome 日常用,PPT 现场用 Safari**。
+
+### 7.4.5 鼠标交互升级(v5.7 新增 · 双击放大 + 单击复制)
+
+**痛点**:之前鼠标点击页面没什么用 — 不能放大看细节,不能复制内容,容易误触。
+
+**v5.7 新行为**:
+
+| 操作 | 触发 | 效果 |
+|---|---|---|
+| 🔍 **双击元素** | 双击任何 `.card / .metric / .step / .quadrant / .insight-page .insight-body / .big-number / .big-quote / .prompt-block / .task-card / .process-flow / .matrix-2x2` | 元素**居中放大到 90vh × 90vw** + 黑色遮罩(模糊背景)+ 平滑动画 |
+| 📋 **单击提示词块** | 单击任何 `.prompt-block` | **一键复制到剪贴板** + 右上角绿色 toast "✓ 已复制" |
+| ✏️ **选文字** | 鼠标拖选 | 浏览器原生选中,可 Cmd+C 复制(不被翻页拦截)|
+| ❌ **关闭放大** | 点击空白 / 按 Esc / 点右上角 ✕ | 平滑退出 |
+
+**视觉提示**:
+- 可放大的元素鼠标 hover 时显示 `cursor: zoom-in`(放大镜+)
+- `.prompt-block` hover 时右上角浮"⌘ 单击复制 · 双击放大"小标签
+
+**编辑模式协作**:按 `E` 进编辑模式时,Lightbox 和单击复制都自动**禁用**(避免跟 contenteditable 打架)。退出编辑后自动恢复。
+
+**翻页方式没动**(键盘 ← → / 空格 / PageDown / 右下角箭头 / 大纲 M / 真触屏左右滑)。本次只是**给鼠标点击补上了实质性的功能**,不动现有翻页。
+
+**为什么做**:讲师现场常需要 (a) 把某张卡片放大让学员看清细节,(b) 复制提示词模板贴到豆包 demo。这两个动作之前只能用浏览器开发者工具 / 右键复制,体验差。v5.7 让鼠标"点了不白点"。
+
+---
 
 ### 7.5 Inline Editing 内置(v5.2 新增 · 浏览器内可编辑)
 

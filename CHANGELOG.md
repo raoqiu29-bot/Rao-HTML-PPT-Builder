@@ -8,6 +8,107 @@
 
 ---
 
+## v5.7.0 · 2026-05-18(鼠标交互升级 · 双击放大 + 单击复制 + 选文字不打架)
+
+**主线**:饶秋实测 v5.6 课件时反馈"鼠标点击没什么用 — 能不能加放大、动画、复制?"。这次直接给鼠标补上实质功能,而不只是"屏幕装饰"。
+
+### ✨ 新增
+
+#### 1. Lightbox 双击放大(任何"内容块")
+
+**触发**:双击 `.card / .metric / .step / .quadrant / .insight-page .insight-body / .big-number / .big-quote / .prompt-block / .task-card / .process-flow / .matrix-2x2` 中的任意一个。
+
+**效果**:
+- 该元素**深克隆**到全屏 lightbox 覆盖层
+- 居中放大到 **90vh × 90vw**,字号放大 1.15×
+- 黑色半透明遮罩 + `backdrop-filter: blur(8px)` 模糊背景
+- 平滑 `transform: scale(0.92 → 1)` 弹入动画(`cubic-bezier(0.16, 1, 0.3, 1)` ease-out-expo)
+- 关闭:点空白 / 按 Esc / 点右上 ✕ — 三种方式都行
+- 关闭也是平滑过渡 + clone DOM 自动清理(不堆积)
+
+**为什么**:讲师现场常需要把卡片放大让后排学员看清,以前只能 Cmd+ 放大整页,现在双击单卡就行。
+
+#### 2. 单击 `.prompt-block` 一键复制
+
+**触发**:单击任何代码块 / 提示词模板块。
+
+**效果**:
+- 自动剥掉 `.prompt-tag` 标签那一行(只复制纯 prompt 文本)
+- 优先用 `navigator.clipboard.writeText`(现代浏览器),老浏览器 fallback 到 `document.execCommand('copy')`
+- 右上角弹绿色 toast "✓ 已复制提示词到剪贴板",1.9 秒后自动消失
+- 失败时弹红色 toast "✗ 复制失败,请手动拖选"
+
+**视觉提示**:hover 时 `.prompt-block` 右上角浮 `⌘ 单击复制 · 双击放大` 小标签(深蓝 + mono 字体)。
+
+**为什么**:培训现场讲完一个提示词模板,学员要复制粘贴试 — 以前要拖选很长一段,经常选错。现在点一下整块。
+
+#### 3. 选文字 / 复制粘贴默认行为(防御)
+
+**问题**:有些 deck 框架会用全屏点击监听翻页,但那样**会拦截浏览器原生的文字拖选**,学员根本没法复制内容。
+
+**v5.7 明确不绑全屏 click → next**。代码里:
+- 单击 `.prompt-block` 触发复制
+- 单击 lightbox 空白触发关闭放大
+- **其他位置的单击什么都不做**(不翻页,不冒泡)
+- 拖选文字时 click 监听里有 `getSelection().length > 0` 的早返(选文字不被中断)
+
+**视觉**:鼠标 hover 在可放大块上时显示 `cursor: zoom-in`,在 prompt-block 上显示 `cursor: pointer`,其他文字区域是默认 `text` cursor — **告诉用户哪里能干什么**。
+
+#### 4. 编辑模式协作(不打架)
+
+按 `E` 进编辑模式时(`body.edit-mode`):
+- Lightbox dblclick 自动禁用(让双击文字 = 选词)
+- 单击复制自动禁用(让点击 = 编辑光标)
+- 所有 `cursor: zoom-in` / `cursor: pointer` 切换回 `cursor: text`
+
+退出编辑模式后自动恢复。**这是 v5.2.4 踩过 contenteditable 冲突的坑,这次提前防御**。
+
+### 📂 文件变更
+
+```
+assets/template.html         +290 行 CSS(放在 .save-toast.show 之后,</style> 之前)
+                             +130 行 JS(新 <script> 块,放在 </body> 之前)
+SKILL.md                     version 5.6.1 → 5.7.0
+                             加 §7.4.5 "鼠标交互升级"段落
+                             tags 加 lightbox-zoom / click-to-copy
+CHANGELOG.md                 本条
+```
+
+**注**:本次还把 `Desktop/AIGC视频生成实战-饶秋McKinsey风-2026-05-18.html` 也手动 patch 上了同一份 CSS+JS(因为成品已交付,用户立刻需要)。以后用 v5.7 模板生成的 deck 自动带这两个功能。
+
+### 🎯 用法变化(对老用户)
+
+**翻页方式完全没动**:键盘 ← → / 空格 / PageDown / Home / End / 右下角箭头 / 大纲 M / 概览 O / 全屏 F / 触屏滑动 — 全保留。
+
+**新增的鼠标动作**:
+- 想放大看某张卡? **双击它**
+- 想复制提示词? **单击代码块**(它会高亮提示"⌘ 单击复制")
+- 想选段文字? **直接拖选**,Cmd+C — 跟之前一样
+
+**视觉提示**:可放大的元素鼠标移上去会变成"放大镜+"光标。代码块光标变成"手"。
+
+### 🔬 验证
+
+- [x] AIGC 32 页课件 Quality Gate(--strict)依然通过,无 P0 回退
+- [x] template.html 重新生成的 demo deck 双击 / 单击都正常
+- [x] 编辑模式(E 键)进入后 lightbox/复制自动禁用
+- [x] Esc 关闭 lightbox 时不会同时触发翻页(capture phase + stopPropagation)
+- [x] 选文字时 click 监听不打断(`getSelection().length > 0` 早返)
+- [x] 同一个 prompt-block 连续单击 → toast 计时重置,不堆积
+- [ ] **下次现场培训实际用一次,验证是否真的更顺手**
+
+### 🧠 设计 trade-off
+
+| 选项 | 选了 | 为什么 |
+|---|---|---|
+| 单击放大 vs 双击放大 | **双击** | 单击保留给"复制 prompt-block",不互斥 |
+| 点击空白翻页 vs 不翻页 | **不翻页** | 翻页用键盘/按钮显式触发更稳;鼠标点空白会拦截选文字 |
+| Lightbox 全屏 vs 局部放大 | **全屏 + 模糊背景** | 局部放大要算偏移,且会被父级 overflow 裁;全屏 lightbox 简单可靠 |
+| 复制时 toast vs 弹窗 | **toast** | 弹窗打断节奏,toast 1.9 秒自动消,不阻塞 |
+| 默认 cursor 提示 vs 不提示 | **提示**(zoom-in / pointer)| "告诉用户能干什么"比"用户自己摸索"好 |
+
+---
+
 ## v5.6.1 · 2026-05-18(hotfix · `export-pdf.sh` 真 32 页 PDF)
 
 **主线**:饶秋实测把 32 页 HTML 课件导成 PDF 时,旧 `export-pdf.sh` 只出 1 页(后来调整后变 8 页)— 远不是 32 页。这次彻底修。
