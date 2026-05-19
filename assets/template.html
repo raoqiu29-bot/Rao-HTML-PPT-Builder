@@ -1278,11 +1278,11 @@ body[data-strict-viewport="off"] .slide{
 body[data-bg="fbm"] .bg-fbm{ display: block; }
 
 /* ============================================================
-   v5.14 · 全屏模式自动隐藏控件(饶秋 2026-05-19 实战反馈)
+   v5.15 · 全屏模式角落热区显示控件(饶秋 2026-05-19 二次反馈)
    ============================================================
-   按 F 进全屏 → 右上角 ctrl-bar + 左下角 nav-arrows + 右下角 page-num
-   默认完全隐藏。鼠标动 → 显示 2.5 秒 → 不动自动隐藏 + 隐藏光标。
-   PPT 演讲标准体验(Keynote / PowerPoint 同款)。
+   按 F 进全屏 → 默认所有角落标签隐藏 (右上 ctrl-bar / 左下 nav-arrows / 右下 page-num)
+   鼠标移到对应角落热区 → 该区域控件淡入;鼠标离开 → 淡出。
+   鼠标光标始终保持正常(不隐藏)。
    ============================================================ */
 :fullscreen .ctrl-bar,
 :fullscreen .nav-arrows,
@@ -1298,19 +1298,26 @@ body[data-bg="fbm"] .bg-fbm{ display: block; }
   pointer-events: none;
   transition: opacity 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-html.fs-active:fullscreen .ctrl-bar,
-html.fs-active:fullscreen .nav-arrows,
-html.fs-active:fullscreen .page-num,
-html.fs-active:-webkit-full-screen .ctrl-bar,
-html.fs-active:-webkit-full-screen .nav-arrows,
-html.fs-active:-webkit-full-screen .page-num {
+/* 鼠标在右上角热区 → 显示 ctrl-bar + brand-bar */
+html.fs-hover-tr:fullscreen .ctrl-bar,
+html.fs-hover-tr:fullscreen .brand-bar,
+html.fs-hover-tr:-webkit-full-screen .ctrl-bar,
+html.fs-hover-tr:-webkit-full-screen .brand-bar {
   opacity: 1;
   pointer-events: auto;
 }
-:fullscreen,
-:-webkit-full-screen { cursor: none; }
-html.fs-active:fullscreen,
-html.fs-active:-webkit-full-screen { cursor: default; }
+/* 鼠标在左下角热区 → 显示 nav-arrows */
+html.fs-hover-bl:fullscreen .nav-arrows,
+html.fs-hover-bl:-webkit-full-screen .nav-arrows {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* 鼠标在右下角热区 → 显示 page-num */
+html.fs-hover-br:fullscreen .page-num,
+html.fs-hover-br:-webkit-full-screen .page-num {
+  opacity: 1;
+  pointer-events: auto;
+}
 
 /* ============================================================
    v5 升级 · Viewport Fitting Base
@@ -2963,32 +2970,50 @@ document.getElementById('overview-btn').addEventListener('click', toggleOverview
 slideshow = new Slideshow();
 
 // ============================================================
-// v5.14 · 全屏模式 · 鼠标动显示控件 / 不动 2.5 秒自动隐藏
+// v5.15 · 全屏模式 · 鼠标进角落热区显示控件(三个独立角落)
 // ============================================================
 (function() {
-  var hideTimer = null;
-  var IDLE_MS = 2500;
+  var HZ_TR_W = 320, HZ_TR_H = 120;   // top-right hot zone (ctrl-bar + brand-bar)
+  var HZ_BL_W = 220, HZ_BL_H = 120;   // bottom-left hot zone (nav-arrows)
+  var HZ_BR_W = 200, HZ_BR_H = 120;   // bottom-right hot zone (page-num)
 
-  function showControls() {
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) return;
-    document.documentElement.classList.add('fs-active');
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(function() {
-      document.documentElement.classList.remove('fs-active');
-    }, IDLE_MS);
+  function inFs() {
+    return document.fullscreenElement || document.webkitFullscreenElement;
   }
 
-  document.addEventListener('mousemove', showControls, { passive: true });
-  document.addEventListener('keydown', showControls);
-  document.addEventListener('touchstart', showControls, { passive: true });
+  function onMove(e) {
+    var cls = document.documentElement.classList;
+    if (!inFs()) {
+      cls.remove('fs-hover-tr');
+      cls.remove('fs-hover-bl');
+      cls.remove('fs-hover-br');
+      return;
+    }
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    var x = e.clientX;
+    var y = e.clientY;
+
+    // top-right
+    if (x > w - HZ_TR_W && y < HZ_TR_H) cls.add('fs-hover-tr');
+    else cls.remove('fs-hover-tr');
+
+    // bottom-left
+    if (x < HZ_BL_W && y > h - HZ_BL_H) cls.add('fs-hover-bl');
+    else cls.remove('fs-hover-bl');
+
+    // bottom-right
+    if (x > w - HZ_BR_W && y > h - HZ_BR_H) cls.add('fs-hover-br');
+    else cls.remove('fs-hover-br');
+  }
+
+  document.addEventListener('mousemove', onMove, { passive: true });
 
   function onFsChange() {
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-      document.documentElement.classList.remove('fs-active');
-      clearTimeout(hideTimer);
-    } else {
-      showControls();
-    }
+    var cls = document.documentElement.classList;
+    cls.remove('fs-hover-tr');
+    cls.remove('fs-hover-bl');
+    cls.remove('fs-hover-br');
   }
   document.addEventListener('fullscreenchange', onFsChange);
   document.addEventListener('webkitfullscreenchange', onFsChange);
