@@ -1278,6 +1278,41 @@ body[data-strict-viewport="off"] .slide{
 body[data-bg="fbm"] .bg-fbm{ display: block; }
 
 /* ============================================================
+   v5.14 · 全屏模式自动隐藏控件(饶秋 2026-05-19 实战反馈)
+   ============================================================
+   按 F 进全屏 → 右上角 ctrl-bar + 左下角 nav-arrows + 右下角 page-num
+   默认完全隐藏。鼠标动 → 显示 2.5 秒 → 不动自动隐藏 + 隐藏光标。
+   PPT 演讲标准体验(Keynote / PowerPoint 同款)。
+   ============================================================ */
+:fullscreen .ctrl-bar,
+:fullscreen .nav-arrows,
+:fullscreen .page-num,
+:fullscreen #hint,
+:fullscreen .brand-bar,
+:-webkit-full-screen .ctrl-bar,
+:-webkit-full-screen .nav-arrows,
+:-webkit-full-screen .page-num,
+:-webkit-full-screen #hint,
+:-webkit-full-screen .brand-bar {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+html.fs-active:fullscreen .ctrl-bar,
+html.fs-active:fullscreen .nav-arrows,
+html.fs-active:fullscreen .page-num,
+html.fs-active:-webkit-full-screen .ctrl-bar,
+html.fs-active:-webkit-full-screen .nav-arrows,
+html.fs-active:-webkit-full-screen .page-num {
+  opacity: 1;
+  pointer-events: auto;
+}
+:fullscreen,
+:-webkit-full-screen { cursor: none; }
+html.fs-active:fullscreen,
+html.fs-active:-webkit-full-screen { cursor: default; }
+
+/* ============================================================
    v5 升级 · Viewport Fitting Base
    借鉴 zarazhangrui/frontend-slides 的 viewport-base.css 4 段精华
    ============================================================ */
@@ -2926,6 +2961,38 @@ document.getElementById('overview-btn').addEventListener('click', toggleOverview
 })();
 
 slideshow = new Slideshow();
+
+// ============================================================
+// v5.14 · 全屏模式 · 鼠标动显示控件 / 不动 2.5 秒自动隐藏
+// ============================================================
+(function() {
+  var hideTimer = null;
+  var IDLE_MS = 2500;
+
+  function showControls() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) return;
+    document.documentElement.classList.add('fs-active');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(function() {
+      document.documentElement.classList.remove('fs-active');
+    }, IDLE_MS);
+  }
+
+  document.addEventListener('mousemove', showControls, { passive: true });
+  document.addEventListener('keydown', showControls);
+  document.addEventListener('touchstart', showControls, { passive: true });
+
+  function onFsChange() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      document.documentElement.classList.remove('fs-active');
+      clearTimeout(hideTimer);
+    } else {
+      showControls();
+    }
+  }
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
+})();
 
 // ============================================================
 // v5.13 · 数字可视化动画引擎(MutationObserver hook · 跟 Slideshow 解耦)
