@@ -2669,41 +2669,7 @@ slideshow = new Slideshow();
   toast.setAttribute('aria-live', 'polite');
   document.body.appendChild(toast);
 
-  // === Lightbox 开/关 ===
-  function openLightbox(element) {
-    var clone = element.cloneNode(true);
-    clone.classList.remove('active', 'hover', 'from-prev');
-    clone.querySelectorAll('[contenteditable]').forEach(function(el) {
-      el.removeAttribute('contenteditable');
-    });
-    if (clone.hasAttribute('contenteditable')) clone.removeAttribute('contenteditable');
-
-    cloneWrap.innerHTML = '';
-    cloneWrap.appendChild(clone);
-    overlay.classList.add('active');
-    overlay.setAttribute('aria-hidden', 'false');
-    document.documentElement.style.overflow = 'hidden';
-  }
-
-  function closeLightbox() {
-    overlay.classList.remove('active');
-    overlay.setAttribute('aria-hidden', 'true');
-    document.documentElement.style.overflow = '';
-    setTimeout(function() { cloneWrap.innerHTML = ''; }, 280);
-  }
-
-  overlay.addEventListener('click', function(e) {
-    if (e.target === overlay) closeLightbox();
-  });
-  closeBtn.addEventListener('click', closeLightbox);
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && overlay.classList.contains('active')) {
-      e.stopPropagation();
-      closeLightbox();
-    }
-  }, true);
-
-  // === 双击放大 ===
+  // === Lightbox 状态(v5.10 新增 · 方向键左右切换当前页同类元素)===
   var zoomableSelectors = [
     '.card', '.metric', '.step', '.quadrant',
     '.insight-page .insight-body',
@@ -2711,7 +2677,105 @@ slideshow = new Slideshow();
     '.prompt-block', '.task-card',
     '.process-flow', '.matrix-2x2'
   ].join(', ');
+  var lightboxSiblings = [];
+  var lightboxIndex = -1;
+  var lightboxHint = overlay.querySelector('.lightbox-hint');
 
+  // === Lightbox 开/关/切换 ===
+  function renderLightboxContent(element) {
+    var clone = element.cloneNode(true);
+    clone.classList.remove('active', 'hover', 'from-prev');
+    clone.querySelectorAll('[contenteditable]').forEach(function(el) {
+      el.removeAttribute('contenteditable');
+    });
+    if (clone.hasAttribute('contenteditable')) clone.removeAttribute('contenteditable');
+    cloneWrap.innerHTML = '';
+    cloneWrap.appendChild(clone);
+    // 更新 hint 显示当前位置 + 操作提示
+    if (lightboxHint) {
+      if (lightboxSiblings.length > 1) {
+        lightboxHint.textContent = '← → 切换 · ' + (lightboxIndex + 1) + ' / ' + lightboxSiblings.length + ' · Esc 关闭';
+      } else {
+        lightboxHint.textContent = '点击空白 / Esc / × 关闭';
+      }
+    }
+  }
+
+  function openLightbox(element) {
+    // 找当前 .slide.active 里所有同类可放大元素 → 列表
+    var activeSlide = document.querySelector('.slide.active');
+    if (activeSlide) {
+      lightboxSiblings = Array.prototype.slice.call(activeSlide.querySelectorAll(zoomableSelectors));
+      lightboxIndex = lightboxSiblings.indexOf(element);
+      if (lightboxIndex === -1) {
+        // fallback:element 不在 active slide(罕见),退化为单元素 lightbox
+        lightboxSiblings = [element];
+        lightboxIndex = 0;
+      }
+    } else {
+      lightboxSiblings = [element];
+      lightboxIndex = 0;
+    }
+    renderLightboxContent(element);
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.documentElement.style.overflow = 'hidden';
+  }
+
+  function lightboxNavigate(dir) {
+    if (lightboxSiblings.length < 2) return;
+    lightboxIndex = (lightboxIndex + dir + lightboxSiblings.length) % lightboxSiblings.length;
+    // 平滑 fade 过渡(避免硬切)
+    cloneWrap.style.opacity = '0';
+    cloneWrap.style.transform = 'scale(0.94)';
+    setTimeout(function() {
+      renderLightboxContent(lightboxSiblings[lightboxIndex]);
+      requestAnimationFrame(function() {
+        cloneWrap.style.opacity = '';
+        cloneWrap.style.transform = '';
+      });
+    }, 160);
+  }
+
+  function closeLightbox() {
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.documentElement.style.overflow = '';
+    setTimeout(function() {
+      cloneWrap.innerHTML = '';
+      lightboxSiblings = [];
+      lightboxIndex = -1;
+    }, 280);
+  }
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeLightbox();
+  });
+  closeBtn.addEventListener('click', closeLightbox);
+
+  // keydown · Esc 关闭 + 方向键切换(capture phase 优先,防止 Slideshow 翻页拦截)
+  document.addEventListener('keydown', function(e) {
+    if (!overlay.classList.contains('active')) return;
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      closeLightbox();
+      return;
+    }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      lightboxNavigate(+1);
+      return;
+    }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      e.stopPropagation();
+      lightboxNavigate(-1);
+      return;
+    }
+  }, true);
+
+  // === 双击放大(zoomableSelectors 已在 lightbox state 里提前定义)===
   document.addEventListener('dblclick', function(e) {
     if (document.body.classList.contains('edit-mode')) return;
     if (overlay.contains(e.target)) return;

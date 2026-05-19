@@ -8,6 +8,101 @@
 
 ---
 
+## v5.10.0 · 2026-05-19(Lightbox 方向键导航 · 饶秋实战反馈第 2 弹)
+
+**主线**:饶秋 2026-05-19 锦江学院课件再次反馈 —— 双击卡片放大后,想看下一张要先按空白/Esc 关掉,再回原页面双击下一张,**操作流程很碎**。要的是 **Lightbox 状态下按方向键直接切到同页下一张卡片**。
+
+### ✨ 新增
+
+#### Lightbox 内方向键导航
+
+**触发**:在 Lightbox 打开状态下按方向键
+
+| 键位 | 动作 |
+|---|---|
+| **→ / ↓ / Space** | 下一张 |
+| **← / ↑** | 上一张 |
+| **Esc** | 关闭 |
+| 点空白 / × | 关闭 |
+
+**范围**:**当前 `.slide.active` 里的所有可放大元素**(`.card / .metric / .step / .quadrant / .insight-page .insight-body / .big-number / .big-quote / .prompt-block / .task-card / .process-flow / .matrix-2x2`)。
+
+**边界行为**:**循环** — 第 1 张按 ← 跳到最后一张,最后一张按 → 跳到第 1 张。不跨片(跨片要 Esc → 翻页 → 重新双击)。
+
+**视觉反馈**:右下角 hint 实时显示 `← → 切换 · 2 / 6 · Esc 关闭`(只在 ≥ 2 张时显示位置;单卡片时显示 `点击空白 / Esc / × 关闭`)。
+
+**过渡动画**:切换时短暂 fade-out (opacity 0 + scale 0.94) → 重新挂载 → fade-in,160ms 一次,**不硬切**。
+
+### 🛠️ 技术细节
+
+#### 1. 状态管理
+
+```js
+var lightboxSiblings = [];    // 当前 lightbox 可切换的同类元素列表
+var lightboxIndex = -1;       // 当前 index
+```
+
+#### 2. 拆解 openLightbox
+
+旧版的 `openLightbox(element)` 既负责"找元素 + 克隆 + 显示 overlay",一次性做完。
+新版拆成两个:
+
+- `openLightbox(element)` — 入口:**找当前 active slide 里的同类元素列表 + 定位 index**,然后调用 render
+- `renderLightboxContent(element)` — 渲染:克隆 + 替换 wrap 内容 + **更新 hint 文本**
+
+这样 `lightboxNavigate(dir)` 切换时只调 render,不重置 overlay,**保持放大状态平滑过渡**。
+
+#### 3. 防 Slideshow 翻页拦截
+
+Lightbox 的 keydown listener 用 **capture phase + stopPropagation**:
+
+```js
+document.addEventListener('keydown', function(e) {
+  if (!overlay.classList.contains('active')) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+    e.preventDefault();
+    e.stopPropagation();  // ← 关键:阻止 Slideshow 看到这个键
+    lightboxNavigate(+1);
+  }
+  // ...
+}, true);  // ← capture phase
+```
+
+不然按 → 会**同时切 lightbox 内卡片 + 翻到下一页**,体验崩。
+
+#### 4. 边界 fallback
+
+如果用户双击的元素不在当前 active slide 里(罕见,比如脚本误触发),`lightboxSiblings` 退化为单元素列表,方向键无效,体验等同 v5.9。
+
+### 📂 文件变更
+
+```
+assets/template.html  · Lightbox JS IIFE 重写(+50 行)· 提取 renderLightboxContent / lightboxNavigate 函数
+SKILL.md              · version 5.9.0 → 5.10.0
+CHANGELOG.md          · 本条
+```
+
+**注**:本次同样把改动直接 patch 到桌面锦江归档 v0.3 课件。
+
+### 🔬 验证
+
+- [x] 锦江课件 audit 8/8 PASS · Quality Gate 12/12 P0 PASS
+- [x] template.html 自查 8/8 PASS
+- [x] lightboxNavigate × 3 / lightboxSiblings × 12 / 方向键 handler × 4(每个文件验证一致)
+- [ ] 实操:用户在 Safari 里双击卡片后按 ← → 验证切换
+
+### 🧠 设计 trade-off
+
+| 选项 | 选了 | 理由 |
+|---|---|---|
+| 同页循环 vs 跨片走 | **同页循环** | 跨片会越过翻页层级,跟现有 Slideshow 模型冲突;循环最简单,用户直觉 |
+| 切换硬切 vs fade | **160ms fade** | 卡片切换有过渡感,不像 PPT 翻页那么硬,符合"放大看细节"语义 |
+| Space 当下一张 vs 当关闭 | **下一张** | 跟 PPT 翻页系统一致(Space = next),用户不用记新键 |
+| hint 显示位置 vs 不显示 | **显示 N / M** | 让用户知道还有多少张可看,不会"切到尾了不知道" |
+| 单卡片时仍显示导航 hint vs 不显示 | **不显示** | 只 1 张时方向键无效,显示反而误导 |
+
+---
+
 ## v5.9.0 · 2026-05-19(Lightbox 真整体放大 · hotfix · 饶秋实战反馈)
 
 **主线**:饶秋 2026-05-19 锦江学院课件实战反馈 — 双击卡片"放大"后,**外框确实变大了,但里面的字号还是原大小**,视觉上很空。这是 v5.7 Lightbox 设计 bug。
